@@ -46,24 +46,26 @@ where
 }
 
 #[axum::async_trait]
-impl<T, B> axum::extract::FromRequest<B> for JsonSuccess<T>
+impl<T, B, S> axum::extract::FromRequest<S, B> for JsonSuccess<T>
 where
     T: serde::de::DeserializeOwned,
-    B: axum::body::HttpBody + Send,
+    B: axum::body::HttpBody + Send + 'static,
     B::Data: Send,
     B::Error: Into<axum::BoxError>,
+    S: Send + Sync,
 {
     type Rejection = axum::extract::rejection::JsonRejection;
     async fn from_request(
-        req: &mut axum::extract::RequestParts<B>,
+        req: axum::http::request::Request<B>,
+        s: &S,
     ) -> Result<Self, Self::Rejection> {
-        Ok(Self(axum::Json::from_request(req).await?.0))
+        Ok(Self(axum::Json::from_request(req, s).await?.0))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use axum::{Extension, Json};
+    use axum::{Json, extract::State};
     use migration::MigratorTrait;
     use sea_orm::{Database, DatabaseConnection, EntityTrait};
 
@@ -80,8 +82,8 @@ mod tests {
     }
 
     impl Bootstrap {
-        pub fn db(&self) -> Extension<DatabaseConnection> {
-            Extension(self.connection.clone())
+        pub fn db(&self) -> State<DatabaseConnection> {
+            State(self.connection.clone())
         }
 
         pub fn uuid(&self) -> UserUuid {
@@ -136,7 +138,7 @@ mod tests {
             .collect();
 
         let JsonSuccess(user) = super::auth::register(
-            Extension(db.clone()),
+            State(db.clone()),
             Json(super::auth::RegisterRequest {
                 email: email.to_string(),
                 password: password.to_string(),

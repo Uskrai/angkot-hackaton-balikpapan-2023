@@ -1,12 +1,12 @@
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
-use axum::{Extension, Json};
+use axum::{extract::State, Json};
 use migration::{Expr, IntoCondition};
 use password_hash::SaltString;
 use rand_core::OsRng;
 use sea_orm::prelude::Uuid;
 use sea_orm::{
-    ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait,
-    QueryFilter, QuerySelect, RelationTrait, TransactionTrait,
+    ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
+    QuerySelect, RelationTrait, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 use validator::Validate;
@@ -39,7 +39,7 @@ pub struct LoginResponse {
 }
 
 pub async fn login(
-    Extension(db): Extension<DatabaseConnection>,
+    State(db): State<DatabaseConnection>,
     Json(auth): Json<AuthRequest>,
 ) -> Result<JsonSuccess<LoginResponse>, Error> {
     auth.validate()?;
@@ -66,8 +66,8 @@ pub async fn login(
                 migration::JoinType::InnerJoin,
                 role::Relation::UserRole
                     .def()
-                    .on_condition(move |_left, right| {
-                        Expr::tbl(right, user_role::Column::UserId)
+                    .on_condition(move |_left, _right| {
+                        Expr::col(user_role::Column::UserId)
                             .eq(user.id)
                             .into_condition()
                     }),
@@ -111,7 +111,7 @@ pub struct RegisterRequest {
 }
 
 pub async fn register(
-    Extension(db): Extension<DatabaseConnection>,
+    State(db): State<DatabaseConnection>,
     Json(auth): Json<RegisterRequest>,
 ) -> Result<JsonSuccess<LoginResponse>, Error> {
     auth.validate()?;
@@ -178,7 +178,7 @@ pub struct ChangePasswordRequest {
 }
 
 pub async fn change_password(
-    Extension(db): Extension<DatabaseConnection>,
+    State(db): State<DatabaseConnection>,
     user: crate::entity::user::Model,
     Json(request): Json<ChangePasswordRequest>,
 ) -> Result<JsonSuccess<()>, Error> {
@@ -222,6 +222,7 @@ mod tests {
     use crate::session::Session;
 
     use super::*;
+    use axum::extract::State;
     use migration::MigratorTrait;
     use sea_orm::{Database, DatabaseConnection};
 
@@ -270,7 +271,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn test_register() {
-        let db = Extension(connection().await);
+        let db = State(connection().await);
 
         let roles = role::Entity::find()
             .all(&db.0)

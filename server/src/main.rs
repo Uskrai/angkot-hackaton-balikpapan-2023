@@ -1,15 +1,20 @@
-mod entity;
 use std::net::SocketAddr;
 
-use axum::{Extension, Router};
+use axum::{extract::FromRef, Extension, Router};
 use migration::MigratorTrait;
-use sea_orm::{ConnectOptions, Database};
+use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod api;
+mod entity;
 mod error;
 mod session;
 mod user;
+
+#[derive(FromRef, Clone)]
+pub struct AppState {
+    connection: DatabaseConnection,
+}
 
 #[tokio::main]
 async fn main() {
@@ -31,6 +36,9 @@ async fn main() {
 
     migration::Migrator::up(&db, None).await.unwrap();
 
+    let state = AppState { connection: db };
+
+
     let apiv1 = Router::new()
         .nest(
             "/auth",
@@ -50,7 +58,7 @@ async fn main() {
 
     let app = Router::new()
         .nest("/api/v1", apiv1)
-        .layer(Extension(db))
+        .with_state(state)
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));

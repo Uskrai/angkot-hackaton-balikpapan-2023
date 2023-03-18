@@ -1,4 +1,4 @@
-use axum::{async_trait, extract::FromRequest};
+use axum::{async_trait, extract::FromRequestParts, RequestPartsExt};
 use sea_orm::{prelude::Uuid, ActiveValue, DatabaseConnection, EntityTrait};
 
 use crate::{
@@ -56,14 +56,12 @@ impl Session {
 }
 
 #[async_trait]
-impl<S> FromRequest<S> for Session
-where
-    S: Send,
-{
+impl<S> FromRequestParts<S> for Session {
     type Rejection = Error;
 
-    async fn from_request(
-        req: &mut axum::extract::RequestParts<S>,
+    async fn from_request_parts(
+        req: &mut axum::http::request::Parts,
+        _s: &S,
     ) -> Result<Self, Self::Rejection> {
         let bearer = req
             .extract::<axum_auth::AuthBearer>()

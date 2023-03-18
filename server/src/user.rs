@@ -1,4 +1,8 @@
-use axum::{async_trait, extract::FromRequest, Extension};
+use axum::{
+    async_trait,
+    extract::{FromRef, FromRequestParts, State},
+    RequestPartsExt,
+};
 use sea_orm::{prelude::Uuid, DatabaseConnection, EntityTrait};
 use serde::{Deserialize, Serialize};
 
@@ -15,17 +19,19 @@ pub struct User {
 }
 
 #[async_trait]
-impl<B> FromRequest<B> for User
+impl<S> FromRequestParts<S> for User
 where
-    B: Send,
+    DatabaseConnection: FromRef<S>,
+    S: Send + Sync,
 {
     type Rejection = Error;
 
-    async fn from_request(
-        req: &mut axum::extract::RequestParts<B>,
+    async fn from_request_parts(
+        req: &mut axum::http::request::Parts,
+        _s: &S,
     ) -> Result<Self, Self::Rejection> {
-        let Extension(db) = req
-            .extract::<Extension<DatabaseConnection>>()
+        let State(db) = req
+            .extract_with_state::<State<DatabaseConnection>, _>(_s)
             .await
             .unwrap();
 
@@ -35,19 +41,18 @@ where
 }
 
 #[async_trait]
-impl<B> FromRequest<B> for crate::entity::user::Model
+impl<S> FromRequestParts<S> for crate::entity::user::Model
 where
-    B: Send,
+    DatabaseConnection: FromRef<S>,
+    S: Send + Sync,
 {
     type Rejection = Error;
 
-    async fn from_request(
-        req: &mut axum::extract::RequestParts<B>,
+    async fn from_request_parts(
+        req: &mut axum::http::request::Parts,
+        s: &S,
     ) -> Result<Self, Self::Rejection> {
-        let Extension(db) = req
-            .extract::<Extension<DatabaseConnection>>()
-            .await
-            .unwrap();
+        let db = DatabaseConnection::from_ref(s);
 
         let session = req.extract::<Session>().await?;
         Self::from_session(&db, session).await
@@ -83,19 +88,18 @@ impl User {
 pub struct UserUuid(pub Uuid);
 
 #[async_trait]
-impl<B> FromRequest<B> for UserUuid
+impl<S> FromRequestParts<S> for UserUuid
 where
-    B: Send,
+    DatabaseConnection: FromRef<S>,
+    S: Send + Sync,
 {
     type Rejection = Error;
 
-    async fn from_request(
-        req: &mut axum::extract::RequestParts<B>,
+    async fn from_request_parts(
+        req: &mut axum::http::request::Parts,
+        s: &S,
     ) -> Result<Self, Self::Rejection> {
-        let Extension(db) = req
-            .extract::<Extension<DatabaseConnection>>()
-            .await
-            .unwrap();
+        let db = DatabaseConnection::from_ref(s);
 
         let session = req.extract::<Session>().await?;
 
