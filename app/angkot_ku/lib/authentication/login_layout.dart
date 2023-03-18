@@ -5,11 +5,8 @@ import 'package:flutter/material.dart';
 import '../constant.dart';
 
 class LoginLayout extends StatefulWidget {
-  const LoginLayout({
-    super.key,
-    required this.apiClient,
-    required this.onLoggedIn
-  });
+  const LoginLayout(
+      {super.key, required this.apiClient, required this.onLoggedIn});
 
   final ApiClient apiClient;
   final void Function() onLoggedIn;
@@ -19,8 +16,8 @@ class LoginLayout extends StatefulWidget {
 }
 
 class _LoginLayoutState extends State<LoginLayout> {
-  String _email = '';
-  String _password = '';
+  final _email = TextEditingController();
+  final _password = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -36,48 +33,55 @@ class _LoginLayoutState extends State<LoginLayout> {
                 width: double.infinity,
                 height: size.height * 0.4,
                 decoration: const BoxDecoration(
-                    borderRadius : BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(0),
                       topRight: Radius.circular(0),
                       bottomLeft: Radius.circular(50),
                       bottomRight: Radius.circular(50),
                     ),
-                    color : mPrimaryColor
-                )
-            ),
+                    color: mPrimaryColor)),
             Align(
               alignment: Alignment.center,
-              child: Column(
+              child: ListView(
                 children: [
                   const SizedBox(height: 35),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Text('ANGKOTKU', textAlign: TextAlign.left, style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                            fontSize: 29,
-                            fontWeight: FontWeight.bold),
+                        Text(
+                          'ANGKOTKU',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              fontSize: 29,
+                              fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height : 0),
-                        Text('Siap menjadi pemandumu', textAlign: TextAlign.left, style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                            fontSize: 16,
-                            letterSpacing: 0,
-                            fontWeight: FontWeight.normal,
-                            height: 1.5),
+                        SizedBox(height: 0),
+                        Text(
+                          'Siap menjadi pemandumu',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              letterSpacing: 0,
+                              fontWeight: FontWeight.normal,
+                              height: 1.5),
                         ),
                       ],
                     ),
                   ),
-                  Image.asset('assets/images/icon.png', height: size.height * 0.35,),
+                  Image.asset(
+                    'assets/images/icon.png',
+                    height: size.height * 0.35,
+                  ),
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
-                      onChanged: (value) => _email = value,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: 'Email Address',
@@ -105,15 +109,17 @@ class _LoginLayoutState extends State<LoginLayout> {
                         ),
                         filled: true,
                         fillColor: const Color.fromRGBO(255, 255, 255, 1),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 15,
+                        ),
                       ),
-                      controller: TextEditingController(),
+                      controller: _email,
                     ),
                   ),
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
-                      onChanged: (value) => _password = value,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         labelText: 'Kata Sandi',
@@ -141,9 +147,12 @@ class _LoginLayoutState extends State<LoginLayout> {
                         ),
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 15,
+                        ),
                       ),
-                      controller: TextEditingController(),
+                      controller: _password,
                     ),
                   ),
                   Container(
@@ -156,10 +165,8 @@ class _LoginLayoutState extends State<LoginLayout> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await widget.apiClient.signIn(
-                            _email,
-                            _password,
-                          );
+                          await widget.apiClient
+                              .signIn(_email.value.text, _password.value.text);
 
                           widget.onLoggedIn.call();
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -167,7 +174,6 @@ class _LoginLayoutState extends State<LoginLayout> {
                               content: Text("login"),
                             ),
                           );
-
                         } catch (e) {
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -201,9 +207,14 @@ class _LoginLayoutState extends State<LoginLayout> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                          RegisterLayout(apiClient: widget.apiClient, onLoggedIn: widget.onLoggedIn)
-                      ));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegisterLayout(
+                              apiClient: widget.apiClient,
+                              onLoggedIn: widget.onLoggedIn),
+                        ),
+                      );
                       // Tambahkan kode untuk menangani aksi ketika tombol "Daftar" ditekan
                     },
                     child: const Text(
@@ -224,8 +235,8 @@ class _LoginLayoutState extends State<LoginLayout> {
             )
           ],
         ),
-      )
+      ),
     );
   }
-
 }
+
