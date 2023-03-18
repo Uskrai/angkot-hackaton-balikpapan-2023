@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:angkot_ku/client/Role.dart';
 import 'package:flutter/material.dart';
 
 import '../client/ApiClient.dart';
@@ -176,11 +176,45 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                     height: 47,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(builder: (context) => RegisterLayout())
-                        // );
+                      onPressed: () async {
+                        try {
+
+                          setState(() {
+                            isLoading = true;
+                          });
+
+                          var role = RoleType.customer;
+                          switch (_type) {
+                            case "Penumpang":
+                              role = RoleType.customer;
+                              break;
+                            case "Bis":
+                              role = RoleType.bus;
+                              break;
+                            case "Angkot":
+                              role = RoleType.sharedTaxi;
+                              break;
+                          }
+
+                          await widget.apiClient.signUp(
+                              _email,
+                              _password,
+                              [
+                                role
+                              ]);
+                          widget.onLoggedIn.call();
+                        } catch(e) {
+                          if (!mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                            ),
+                          );
+                        }
+                        setState(() {
+                          isLoading = false;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
