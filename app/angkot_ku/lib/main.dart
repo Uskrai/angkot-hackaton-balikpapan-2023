@@ -2,6 +2,7 @@ import 'package:angkot_ku/authentication/login_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 
+import 'authentication/register_layout.dart';
 import 'client/ApiClient.dart';
 import 'client/Role.dart';
 import 'delete/dummy_route.dart';
@@ -81,7 +82,7 @@ class _MyAppState extends State<MyApp> {
             //       );
             //   }
             default:
-              return LoginLayout(
+              return RegisterLayout(
                 apiClient: widget.apiClient,
                 onLoggedIn: () {
                   setState(() {});
