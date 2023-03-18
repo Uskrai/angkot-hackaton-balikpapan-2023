@@ -6,16 +6,16 @@ use sea_orm::IntoActiveModel;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::PathUuid;
 use crate::error::Error;
 use crate::geo::Location;
+use crate::PathUuid;
 
 #[derive(Serialize, Deserialize)]
 pub struct RouteResponse {
     pub id: Uuid,
     pub name: String,
     pub lines: Vec<Location>,
-    pub vehicle: VehicleType,
+    pub r#type: VehicleType,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -30,7 +30,7 @@ impl RouteResponse {
             name: model.name,
             lines: serde_json::from_value::<LinesContent>(model.lines)?.lines,
             // route: model.route,
-            vehicle: VehicleType::from_model(model.vehicle),
+            r#type: VehicleType::from_model(model.vehicle_type),
         })
     }
 }
@@ -77,7 +77,7 @@ pub async fn index(State(db): State<DatabaseConnection>) -> Result<Json<IndexRes
 pub struct CreateRequest {
     pub name: String,
     pub lines: Vec<Location>,
-    pub vehicle: VehicleType,
+    pub r#type: VehicleType,
 }
 
 pub async fn create(
@@ -87,7 +87,7 @@ pub async fn create(
     let model = crate::entity::route::Model {
         id: Uuid::new_v4(),
         name: request.name,
-        vehicle: request.vehicle.into_model(),
+        vehicle_type: request.r#type.into_model(),
         lines: serde_json::to_value(LinesContent {
             lines: request.lines,
         })?,

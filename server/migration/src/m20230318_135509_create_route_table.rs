@@ -31,7 +31,7 @@ impl MigrationTrait for Migration {
                     .col(
                         // VehicleType
                         ColumnDef::new_with_type(
-                            Route::Vehicle,
+                            Route::VehicleType,
                             <VehicleType as ActiveEnum>::db_type()
                                 .get_column_type()
                                 .clone(),
@@ -65,7 +65,7 @@ enum Route {
     Table,
     Id,
     Name,
-    Vehicle,
+    VehicleType,
     Lines,
 }
 
