@@ -1,9 +1,6 @@
 
 import 'package:angkot_ku/authentication/register_layout.dart';
 import 'package:angkot_ku/constant.dart';
-import 'package:flutter/cupertino.dart';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 class LoginLayout extends StatelessWidget {
@@ -130,37 +127,35 @@ class LoginLayout extends StatelessWidget {
                   ),
                 ),
                 Container(
-              width: double.infinity,
-              height: 47,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterLayout())
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  width: double.infinity,
+                  height: 47,
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterLayout())
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      primary: const Color.fromRGBO(0, 96, 194, 1),
+                    ),
+                    child: const Text(
+                      'Masuk',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: Color.fromRGBO(255, 255, 255, 1),
+                        fontFamily: 'Poppins',
+                        fontSize: 20,
+                        fontWeight: FontWeight.normal,
+                        height: 1,
+                      ),
+                    ),
                   ),
-                  primary: const Color.fromRGBO(0, 96, 194, 1),
-                ),
-                child: const Text(
-                  'Masuk',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: Color.fromRGBO(255, 255, 255, 1),
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    fontWeight: FontWeight.normal,
-                    height: 1,
-                  ),
-                ),
-              ),
-            ),
-
-
+                )
             ],
             ),
           )
