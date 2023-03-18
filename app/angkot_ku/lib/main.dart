@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Angkot Ku',
         theme: ThemeData(),
         home: const Scaffold(
           body: LoginLayout(),

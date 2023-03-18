@@ -1,7 +1,5 @@
 import 'package:latlong2/latlong.dart';
 
-enum DriverType { bus, sharedTaxi }
-
 abstract class User {
   const User();
 
