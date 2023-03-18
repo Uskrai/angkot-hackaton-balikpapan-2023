@@ -203,6 +203,12 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                                 role
                               ]);
                           widget.onLoggedIn.call();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("suscces"),
+                            ),
+                          );
                         } catch(e) {
                           if (!mounted) return;
 
