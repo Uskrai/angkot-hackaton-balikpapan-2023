@@ -217,3 +217,163 @@ fn hash_password(password: &str) -> Result<String, Error> {
         .map_err(Into::into)
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::session::Session;
+
+    use super::*;
+    use migration::MigratorTrait;
+    use sea_orm::{Database, DatabaseConnection};
+
+    pub async fn connection() -> DatabaseConnection {
+        let db = Database::connect("sqlite::memory:").await.unwrap();
+        migration::Migrator::up(&db, None).await.unwrap();
+        db
+    }
+
+    #[tokio::test]
+    pub async fn test_login() {
+        let bootstrap = super::super::tests::bootstrap().await;
+        let req = AuthRequest {
+            email: bootstrap.user_email(),
+            password: bootstrap.user_password(),
+        };
+
+        let JsonSuccess(session) = login(bootstrap.db(), Json(req.clone())).await.unwrap();
+
+        assert!(matches!(
+            login(
+                bootstrap.db(),
+                Json(AuthRequest {
+                    password: "wrongpassword".to_string(),
+                    ..req.clone()
+                }),
+            )
+            .await,
+            Err(Error::Unauthorized(
+                UnauthorizedType::WrongUsernameOrPassword
+            ))
+        ));
+
+        let session = Session {
+            bearer: axum_auth::AuthBearer(session.session),
+        };
+
+        let JsonSuccess(user) = profile(
+            crate::user::User::from_session(bootstrap.connection(), session)
+                .await
+                .unwrap(),
+        )
+        .await;
+        assert_eq!(user.email, req.email);
+    }
+
+    #[tokio::test]
+    pub async fn test_register() {
+        let db = Extension(connection().await);
+
+        let roles = role::Entity::find()
+            .all(&db.0)
+            .await
+            .unwrap()
+            .into_iter()
+            .collect::<Vec<_>>();
+
+        let rolesreq = roles
+            .clone()
+            .into_iter()
+            .map(|it| RoleRequest { id: it.id })
+            .collect();
+
+        let req = RegisterRequest {
+            email: "example@example.com".to_string(),
+            password: "examplepassword".to_string(),
+            roles: rolesreq,
+        };
+        register(db.clone(), Json(req.clone())).await.unwrap();
+
+        assert_eq!(
+            login(
+                db.clone(),
+                Json(AuthRequest {
+                    email: req.email.clone(),
+                    password: req.password.clone(),
+                }),
+            )
+            .await
+            .unwrap()
+            .0
+            .roles,
+            roles
+                .clone()
+                .into_iter()
+                .map(|it| RoleResponse {
+                    id: it.id,
+                    name: it.name
+                })
+                .collect::<Vec<_>>()
+        );
+
+        assert!(matches!(
+            register(db.clone(), Json(req.clone())).await,
+            Err(Error::MustUniqueError(_))
+        ));
+    }
+
+    #[tokio::test]
+    pub async fn test_hash() {
+        let password = "examplepassword";
+        let hashed = hash_password(password).unwrap();
+        assert!(verify_password(password, &hashed));
+    }
+
+    #[tokio::test]
+    pub async fn test_change_password() {
+        let bootstrap = super::super::tests::bootstrap().await;
+
+        let new_password = "new_password";
+        let req = ChangePasswordRequest {
+            old_password: bootstrap.user_password(),
+            new_password: new_password.to_string(),
+        };
+
+        change_password(
+            bootstrap.db(),
+            bootstrap.user_model().await,
+            Json(ChangePasswordRequest {
+                old_password: "wrongpassword".to_string(),
+                new_password: "wrongpassword".to_string(),
+            }),
+        )
+        .await
+        .expect_err("wrong password should fail");
+
+        change_password(
+            bootstrap.db(),
+            bootstrap.user_model().await,
+            Json(req.clone()),
+        )
+        .await
+        .expect("should success");
+
+        login(
+            bootstrap.db(),
+            Json(AuthRequest {
+                email: bootstrap.user_email(),
+                password: new_password.to_string(),
+            }),
+        )
+        .await
+        .expect("new password should be correct");
+
+        login(
+            bootstrap.db(),
+            Json(AuthRequest {
+                email: bootstrap.user_email(),
+                password: bootstrap.user_password(),
+            }),
+        )
+        .await
+        .expect_err("old password should error");
+    }
+}
