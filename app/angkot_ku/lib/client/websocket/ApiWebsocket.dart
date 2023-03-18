@@ -9,7 +9,6 @@ import '../../temp/route.dart';
 import '../../maps.dart';
 import '../User.dart';
 
-
 abstract class ApiWebsocketClient {
   Stream get changed;
   List<User> get users;
@@ -19,6 +18,7 @@ abstract class ApiWebsocketClient {
   void connect();
   void changeLocation(LatLng location);
   void close();
+  bool isClosed();
 }
 
 abstract class GenericWebsocketClient extends ApiWebsocketClient {
@@ -75,10 +75,10 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
     String uri;
     switch (driver) {
       case DriverType.bus:
-        uri = Uri.encodeFull("ws://$url/customer/bus/${route.name}");
+        uri = Uri.encodeFull("ws://$url/customer/bus/${route.id}");
         break;
       case DriverType.sharedTaxi:
-        uri = Uri.encodeFull("ws://$url/customer/shared-taxi/${route.name}");
+        uri = Uri.encodeFull("ws://$url/customer/shared-taxi/${route.id}");
         break;
     }
 
@@ -123,6 +123,11 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
   void close() {
     _changedController.close();
     _wsChannel?.sink.close();
+  }
+
+  @override
+  bool isClosed() {
+    return _changedController.isClosed || _wsChannel?.closeCode != null;
   }
 }
 
@@ -190,6 +195,11 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
     _changedController.close();
     _wsChannel?.sink.close();
   }
+
+  @override
+  bool isClosed() {
+    return _changedController.isClosed || _wsChannel?.closeCode != null;
+  }
 }
 
 class BusWebsocketClient extends GenericWebsocketClient {
@@ -255,6 +265,11 @@ class BusWebsocketClient extends GenericWebsocketClient {
   void close() {
     _changedController.close();
     _wsChannel?.sink.close();
+  }
+
+  @override
+  bool isClosed() {
+    return _changedController.isClosed || _wsChannel?.closeCode != null;
   }
 }
 
