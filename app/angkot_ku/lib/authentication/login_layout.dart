@@ -7,11 +7,11 @@ class LoginLayout extends StatelessWidget {
   const LoginLayout({
     super.key,
     // required this.apiClient, not implemented yet
-    required this.onLoggedIn,
+    // required this.onLoggedIn,
   });
 
   // final ApiClient apiClient; not implemented yet
-  final void Function() onLoggedIn;
+  // final void Function() onLoggedIn;
 
   @override
   Widget build(BuildContext context) {
