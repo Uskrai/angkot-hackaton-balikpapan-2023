@@ -11,6 +11,11 @@ use crate::geo::Location;
 use crate::PathUuid;
 
 #[derive(Serialize, Deserialize)]
+pub struct IndexResponse {
+    routes: Vec<RouteResponse>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct RouteResponse {
     pub id: Uuid,
     pub name: String,
@@ -23,6 +28,12 @@ pub struct LinesContent {
     lines: Vec<Location>,
 }
 
+#[derive(Serialize, Deserialize)]
+pub enum VehicleType {
+    Bus,
+    SharedTaxi,
+}
+
 impl RouteResponse {
     pub fn from_model(model: crate::entity::route::Model) -> Result<Self, serde_json::Error> {
         Ok(Self {
@@ -33,12 +44,6 @@ impl RouteResponse {
             r#type: VehicleType::from_model(model.vehicle_type),
         })
     }
-}
-
-#[derive(Serialize, Deserialize)]
-pub enum VehicleType {
-    Bus,
-    SharedTaxi,
 }
 
 impl VehicleType {
@@ -55,11 +60,6 @@ impl VehicleType {
             VehicleType::SharedTaxi => crate::entity::sea_orm_active_enums::VehicleType::SharedTaxi,
         }
     }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct IndexResponse {
-    routes: Vec<RouteResponse>,
 }
 
 pub async fn index(State(db): State<DatabaseConnection>) -> Result<Json<IndexResponse>, Error> {
