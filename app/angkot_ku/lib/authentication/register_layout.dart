@@ -5,9 +5,11 @@ import '../client/ApiClient.dart';
 import '../constant.dart';
 
 class RegisterLayout extends StatefulWidget {
-  const RegisterLayout({super.key,
+  const RegisterLayout({
+    super.key,
     required this.apiClient,
-    required this.onLoggedIn});
+    required this.onLoggedIn
+  });
 
   final ApiClient apiClient;
   final void Function() onLoggedIn;
@@ -16,8 +18,7 @@ class RegisterLayout extends StatefulWidget {
   State<StatefulWidget> createState() => _RegisterLayoutState();
 }
 
-class _RegisterLayoutState extends State<RegisterLayout>{
-
+class _RegisterLayoutState extends State<RegisterLayout> {
   String _email = "";
   String _password = "";
   String _type = "Penumpang";
@@ -206,8 +207,6 @@ class _RegisterLayoutState extends State<RegisterLayout>{
           ],
         ),
       )
-
     );
   }
-
 }
