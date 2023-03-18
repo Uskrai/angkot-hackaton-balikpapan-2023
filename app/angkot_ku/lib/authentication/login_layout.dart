@@ -120,7 +120,6 @@ class _LoginLayoutState extends State<LoginLayout> {
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
-                      obscureText: true,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         labelText: 'Kata Sandi',
@@ -166,8 +165,10 @@ class _LoginLayoutState extends State<LoginLayout> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await widget.apiClient
-                              .signIn(_email.value.text, _password.value.text);
+                          await widget.apiClient.signIn(
+                            _email.value.text,
+                            _password.value.text
+                          );
 
                           widget.onLoggedIn.call();
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -206,31 +207,28 @@ class _LoginLayoutState extends State<LoginLayout> {
                       ),
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(top: 24),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RegisterLayout(
-                                apiClient: widget.apiClient,
-                                onLoggedIn: widget.onLoggedIn),
-                          ),
-                        );
-                        // Tambahkan kode untuk menangani aksi ketika tombol "Daftar" ditekan
-                      },
-                      child: const Text(
-                        'Belum punya akun? Daftar',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.blue, // Warna teks menjadi biru
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          letterSpacing: 0,
-                          fontWeight: FontWeight.normal,
-                          height: 1,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegisterLayout(
+                              apiClient: widget.apiClient,
+                              onLoggedIn: widget.onLoggedIn),
                         ),
+                      );
+                      // Tambahkan kode untuk menangani aksi ketika tombol "Daftar" ditekan
+                    },
+                    child: const Text(
+                      'Belum punya akun? Daftar',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.blue, // Warna teks menjadi biru
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        letterSpacing: 0,
+                        fontWeight: FontWeight.normal,
+                        height: 1,
                       ),
                     ),
                   )
