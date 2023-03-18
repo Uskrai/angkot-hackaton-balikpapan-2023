@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod role;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct JsonSuccess<T>(pub T);

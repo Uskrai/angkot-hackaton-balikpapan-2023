@@ -42,6 +42,10 @@ async fn main() {
                     "/changepassword",
                     axum::routing::post(api::v1::auth::change_password),
                 ),
+        )
+        .nest(
+            "/role",
+            Router::new().route("/", axum::routing::get(api::v1::role::index)),
         );
 
     let app = Router::new()
