@@ -172,6 +172,7 @@ class ApiClient {
   ) {
     return CustomerWebsocketClient(
       url,
+      auth!.session,
       route,
       Customer(email: "", location: customer.location),
       driver,
@@ -182,7 +183,12 @@ class ApiClient {
     LineRoute route,
     InitialSharedTaxi sharedTaxi,
   ) {
-    return SharedTaxiWebsocketClient(url, route, SharedTaxi(email: "", location: sharedTaxi.location));
+    return SharedTaxiWebsocketClient(
+      url,
+      auth!.session,
+      route,
+      SharedTaxi(email: "", location: sharedTaxi.location),
+    );
   }
 
   ApiWebsocketClient createBus(
@@ -191,6 +197,7 @@ class ApiClient {
   ) {
     return BusWebsocketClient(
       url,
+      auth!.session,
       route,
       Bus(email: "", location: bus.location),
     );

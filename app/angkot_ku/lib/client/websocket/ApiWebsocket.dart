@@ -49,7 +49,13 @@ abstract class GenericWebsocketClient extends ApiWebsocketClient {
 }
 
 class CustomerWebsocketClient extends GenericWebsocketClient {
-  CustomerWebsocketClient(this.url, this.route, this.customer, this.driver);
+  CustomerWebsocketClient(
+    this.url,
+    this.authorization,
+    this.route,
+    this.customer,
+    this.driver,
+  );
 
   final _changedController = StreamController();
 
@@ -71,6 +77,7 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
   @override
   User get currentUser => customer;
 
+  final String authorization;
   String url;
   LineRoute route;
   Customer customer;
@@ -87,7 +94,12 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
         break;
     }
 
-    var channel = IOWebSocketChannel.connect(uri);
+    var channel = IOWebSocketChannel.connect(
+      uri,
+      headers: {
+        "Authorization": "Bearer $authorization",
+      },
+    );
     channel.sink.add(
       jsonEncode(
         {
@@ -142,7 +154,12 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
 }
 
 class SharedTaxiWebsocketClient extends GenericWebsocketClient {
-  SharedTaxiWebsocketClient(this.url, this.route, this.sharedTaxi);
+  SharedTaxiWebsocketClient(
+    this.url,
+    this.authorization,
+    this.route,
+    this.sharedTaxi,
+  );
   final _changedController = StreamController();
   @override
   Stream get changed => _changedController.stream;
@@ -153,6 +170,7 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
   @override
   IOWebSocketChannel? _wsChannel;
 
+  final String authorization;
   final String url;
   final LineRoute route;
 
@@ -169,7 +187,12 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
     var uri = Uri.encodeFull(
       "ws://$url/$routeName/${route.name}",
     );
-    var channel = IOWebSocketChannel.connect(uri);
+    var channel = IOWebSocketChannel.connect(
+      uri,
+      headers: {
+        "Authorization": "Bearer $authorization",
+      },
+    );
     channel.sink.add(
       jsonEncode(
         {
@@ -218,7 +241,7 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
 }
 
 class BusWebsocketClient extends GenericWebsocketClient {
-  BusWebsocketClient(this.url, this.route, this.bus);
+  BusWebsocketClient(this.url, this.authorization, this.route, this.bus);
   final _changedController = StreamController();
   @override
   Stream get changed => _changedController.stream;
@@ -230,6 +253,7 @@ class BusWebsocketClient extends GenericWebsocketClient {
   IOWebSocketChannel? _wsChannel;
 
   final String url;
+  final String authorization;
   final LineRoute route;
 
   @override
@@ -246,7 +270,12 @@ class BusWebsocketClient extends GenericWebsocketClient {
     var uri = Uri.encodeFull(
       "ws://$url/$routeName/${route.name}",
     );
-    var channel = IOWebSocketChannel.connect(uri);
+    var channel = IOWebSocketChannel.connect(
+      uri,
+      headers: {
+        "Authorization": "Bearer $authorization",
+      },
+    );
     channel.sink.add(
       jsonEncode(
         {
