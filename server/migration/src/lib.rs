@@ -2,6 +2,7 @@ pub use sea_orm_migration::prelude::*;
 
 mod m20221126_154332_create_user_table;
 mod m20221126_155600_create_session_table;
+mod m20221126_172825_create_role_table;
 
 pub struct Migrator;
 
@@ -11,6 +12,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20221126_154332_create_user_table::Migration),
             Box::new(m20221126_155600_create_session_table::Migration),
+            Box::new(m20221126_172825_create_role_table::Migration),
         ]
     }
 }
