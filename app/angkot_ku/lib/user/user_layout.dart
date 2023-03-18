@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
+
 Future<void> checkPermission() async {
   var locationService = await Geolocator.isLocationServiceEnabled();
   if (!locationService) {
