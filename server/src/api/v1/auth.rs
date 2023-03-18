@@ -18,11 +18,79 @@ use crate::user::User;
 
 use super::JsonSuccess;
 
+#[derive(Debug, Serialize, Deserialize, Validate, Clone)]
+pub struct AuthRequest {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 8, max = 64))]
+    pub password: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct RoleResponse {
+    id: i32,
+    name: String,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginResponse {
     pub roles: Vec<RoleResponse>,
     pub session: String,
 }
+
+pub async fn login(
+    Extension(db): Extension<DatabaseConnection>,
+    Json(auth): Json<AuthRequest>,
+) -> Result<JsonSuccess<LoginResponse>, Error> {
+    auth.validate()?;
+
+    let user = user::Entity::find()
+        .filter(user::Column::Email.eq(auth.email.clone()))
+        .one(&db)
+        .await?;
+
+    let user = match user {
+        Some(user) => user,
+        None => {
+            return Err(Error::Unauthorized(
+                UnauthorizedType::WrongUsernameOrPassword,
+            ))
+        }
+    };
+
+    if verify_password(&auth.password, &user.password) {
+        let session = generate_session(&db, user.id).await?;
+
+        let roles = role::Entity::find()
+            .join(
+                migration::JoinType::InnerJoin,
+                role::Relation::UserRole
+                    .def()
+                    .on_condition(move |_left, right| {
+                        Expr::tbl(right, user_role::Column::UserId)
+                            .eq(user.id)
+                            .into_condition()
+                    }),
+            )
+            .all(&db)
+            .await?;
+
+        let roles = roles
+            .into_iter()
+            .map(|it| RoleResponse {
+                id: it.id,
+                name: it.name,
+            })
+            .collect::<Vec<_>>();
+
+        Ok(JsonSuccess(LoginResponse { session, roles }))
+    } else {
+        Err(Error::Unauthorized(
+            UnauthorizedType::WrongUsernameOrPassword,
+        ))
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RoleRequest {
     pub id: i32,
