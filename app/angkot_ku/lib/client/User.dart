@@ -77,3 +77,35 @@ class Bus extends User {
   }
 }
 
+class InitialCustomer {
+  InitialCustomer({required this.location});
+  LatLng location;
+
+  InitialCustomer copyWith({
+    LatLng? location,
+  }) {
+    return InitialCustomer(location: location ?? this.location);
+  }
+}
+
+class InitialSharedTaxi {
+  InitialSharedTaxi({required this.location});
+  LatLng location;
+
+  InitialSharedTaxi copyWith({
+    LatLng? location,
+  }) {
+    return InitialSharedTaxi(location: location ?? this.location);
+  }
+}
+
+class InitialBus {
+  InitialBus({required this.location});
+  LatLng location;
+
+  InitialBus copyWith({
+    LatLng? location,
+  }) {
+    return InitialBus(location: location ?? this.location);
+  }
+}

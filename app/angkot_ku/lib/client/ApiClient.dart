@@ -12,15 +12,10 @@ import 'package:http/http.dart' as http;
 
 import 'Role.dart';
 
-enum AuthenticationStatus {
-  authenticated,
-  unkown
-}
+enum AuthenticationStatus { authenticated, unkown }
 
-enum RouteStatus {
-  loaded,
-  unkown
-}
+enum RouteStatus { loaded, unkown }
+
 class ApiClient {
   ApiClient({required this.url});
   final String url;
@@ -138,10 +133,10 @@ class ApiClient {
   }
 
   Future<void> signUp(
-      String email,
-      String password,
-      List<RoleType> role,
-      ) async {
+    String email,
+    String password,
+    List<RoleType> role,
+  ) async {
     var response = await http.post(Uri.http(url, "api/v1/auth/register"),
         body: jsonEncode(
           {
@@ -172,31 +167,38 @@ class ApiClient {
 
   ApiWebsocketClient createCustomer(
     LineRoute route,
-    Customer customer,
+    InitialCustomer customer,
     DriverType driver,
   ) {
-    return CustomerWebsocketClient(url, route, customer, driver);
+    return CustomerWebsocketClient(
+      url,
+      route,
+      Customer(email: "", location: customer.location),
+      driver,
+    );
   }
 
   ApiWebsocketClient createSharedTaxi(
     LineRoute route,
-    SharedTaxi sharedTaxi,
+    InitialSharedTaxi sharedTaxi,
   ) {
-    return SharedTaxiWebsocketClient(url, route, sharedTaxi);
+    return SharedTaxiWebsocketClient(url, route, SharedTaxi(email: "", location: sharedTaxi.location));
   }
 
   ApiWebsocketClient createBus(
     LineRoute route,
-    Bus bus,
+    InitialBus bus,
   ) {
-    return BusWebsocketClient(url, route, bus);
+    return BusWebsocketClient(
+      url,
+      route,
+      Bus(email: "", location: bus.location),
+    );
   }
 
   Future<void> getRoutes() async {
-    var response = await http.get(
-      Uri.http(url, "api/v1/route"),
-      headers: {"Content-Type": "application/json"}
-    );
+    var response = await http.get(Uri.http(url, "api/v1/route"),
+        headers: {"Content-Type": "application/json"});
 
     var body = response.body;
     dynamic json;
@@ -225,21 +227,17 @@ class ApiClient {
 
       List<LatLng> points = List.empty(growable: true);
       for (var line in route['lines']) {
-        points.add(LatLng(
-            line['latitude'],
-            line['longitude']
-        ));
+        points.add(LatLng(line['latitude'], line['longitude']));
       }
-      Lines lines =  Lines(name: "", points: points);
-
+      Lines lines = Lines(name: "", points: points);
 
       switch (type) {
-
         case VehicleType.Bus:
           bus.add(LineRoute(id: id, type: type, lines: [lines], name: name));
           break;
         case VehicleType.SharedTaxi:
-          sharedTaxi.add(LineRoute(id: id, type: type, lines: [lines], name: name));
+          sharedTaxi
+              .add(LineRoute(id: id, type: type, lines: [lines], name: name));
           break;
       }
     }
@@ -248,5 +246,5 @@ class ApiClient {
     route = routes;
     _routesController.add(null);
     routeStatus = RouteStatus.loaded;
- }
+  }
 }

@@ -105,7 +105,7 @@ class _HomeUserInnerWidgetState extends State<HomeUserInnerWidget> {
   ) {
     final api = widget.apiClient.createCustomer(
       route,
-      Customer(location: widget.center),
+      InitialCustomer(location: widget.center),
       driverType,
     );
 

@@ -9,6 +9,11 @@ import '../../temp/route.dart';
 import '../../maps.dart';
 import '../User.dart';
 
+class InitialMessage {
+  InitialMessage({required this.email});
+  String email;
+}
+
 abstract class ApiWebsocketClient {
   Stream get changed;
   List<User> get users;
@@ -103,6 +108,11 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
         if (handleReceive(json, _users)) {
           _changedController.add(null);
         }
+
+        var initial = decodeInitialMessage(json);
+        if (initial != null) {
+          customer = customer.copyWith(email: initial.email);
+        }
       },
     );
 
@@ -179,6 +189,11 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
       if (handleReceive(json, _users)) {
         _changedController.add(null);
       }
+
+      var initial = decodeInitialMessage(json);
+      if (initial != null) {
+        sharedTaxi = sharedTaxi.copyWith(email: initial.email);
+      }
     });
   }
 
@@ -219,6 +234,7 @@ class BusWebsocketClient extends GenericWebsocketClient {
 
   @override
   User get currentUser => bus;
+
   Bus bus;
 
   @override
@@ -250,6 +266,11 @@ class BusWebsocketClient extends GenericWebsocketClient {
       if (handleReceive(json, _users)) {
         _changedController.add(null);
       }
+
+      var initial = decodeInitialMessage(json);
+      if (initial != null) {
+        bus = bus.copyWith(email: initial.email);
+      }
     });
   }
 
@@ -271,6 +292,15 @@ class BusWebsocketClient extends GenericWebsocketClient {
   bool isClosed() {
     return _changedController.isClosed || _wsChannel?.closeCode != null;
   }
+}
+
+InitialMessage? decodeInitialMessage(dynamic json) {
+  if (json['InitialMessage'] != null) {
+    var email = json['email'];
+
+    return InitialMessage(email: email);
+  }
+  return null;
 }
 
 bool handleReceive(dynamic json, HashMap<String, User> users) {
@@ -331,4 +361,3 @@ bool handleReceive(dynamic json, HashMap<String, User> users) {
 
   return isHandled;
 }
-

@@ -146,6 +146,7 @@ impl User {
 // message that is send by all handler
 #[derive(Debug, Clone)]
 pub enum StateMessage {
+    InitialMessage(crate::user::User),
     NewUser(String),
     UpdateLocation(String),
     CloseUser(String),
@@ -369,6 +370,7 @@ pub struct UpdateLocation {
 // message that user receive
 #[derive(Serialize, Debug)]
 pub enum MessageToUser {
+    InitialMessage(crate::user::User),
     NewUser { id: String, user: User },
     UpdateLocation { id: String, location: Location },
     RemoveUser { id: String },
@@ -426,6 +428,11 @@ impl UserState {
 
     pub async fn send_message(&mut self, message: StateMessage) -> bool {
         match message {
+            StateMessage::InitialMessage(user) => {
+                self.send_force(MessageToUser::InitialMessage(user))
+                    .await
+                    .ok();
+            }
             StateMessage::NewUser(new_id) => {
                 if new_id == self.id {
                     return true;
@@ -570,6 +577,10 @@ where
     };
 
     let channel_receiver = async {
+        userstate
+            .send_message(StateMessage::InitialMessage(user_model.clone()))
+            .await;
+
         while let Ok(it) = rx.recv().await {
             tracing::trace!("received: {current_id} {it:?}");
             match it {
