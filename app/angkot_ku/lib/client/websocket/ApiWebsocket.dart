@@ -185,7 +185,7 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
   @override
   void connect() {
     var uri = Uri.encodeFull(
-      "ws://$url/$routeName/${route.name}",
+      "ws://$url/$routeName/${route.id}",
     );
     var channel = IOWebSocketChannel.connect(
       uri,
@@ -267,8 +267,9 @@ class BusWebsocketClient extends GenericWebsocketClient {
 
   @override
   void connect() {
+    print(route.id);
     var uri = Uri.encodeFull(
-      "ws://$url/$routeName/${route.name}",
+      "ws://$url/$routeName/${route.id}",
     );
     var channel = IOWebSocketChannel.connect(
       uri,
@@ -325,8 +326,9 @@ class BusWebsocketClient extends GenericWebsocketClient {
 
 InitialMessage? decodeInitialMessage(dynamic json) {
   if (json['InitialMessage'] != null) {
-    var email = json['email'];
+    var email = json["InitialMessage"]['email'];
 
+    print(json);
     return InitialMessage(email: email);
   }
   return null;
