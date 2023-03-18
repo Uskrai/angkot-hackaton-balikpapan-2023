@@ -114,6 +114,7 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
+                      obscureText: true,
                       onChanged: (value) => _password = value,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
@@ -201,7 +202,6 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                               [
                                 role
                               ]);
-                          widget.onLoggedIn.call();
 
                           Navigator.pop(context);
                         } catch(e) {
