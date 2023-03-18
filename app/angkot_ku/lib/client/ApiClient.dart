@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:angkot_ku/client/User.dart';
 import 'package:angkot_ku/client/VehicleType.dart';
 import 'package:angkot_ku/temp/route.dart';
 import 'package:latlong2/latlong.dart';
@@ -15,16 +16,25 @@ enum AuthenticationStatus {
   unkown
 }
 
+enum RouteStatus {
+  loaded,
+  unkown
+}
 class ApiClient {
   ApiClient({required this.url});
   final String url;
   final _authenticationController = StreamController();
+  final _routesController = StreamController();
 
   Authenticated? auth;
+  RoleRoute? route;
 
   Stream get authenticationStream => _authenticationController.stream;
+  Stream get routeStream => _routesController.stream;
 
   var authenticationStatus = AuthenticationStatus.unkown;
+  var routeType = DriverType.bus;
+  var routeStatus = RouteStatus.unkown;
 
   void handleRoutesResponse(http.Response response) {
     var body = response.body;
@@ -92,9 +102,13 @@ class ApiClient {
           break;
         case "Shared Taxi":
           name = RoleType.sharedTaxi;
+          _routesController.add(null);
+          routeType = DriverType.sharedTaxi;
           break;
         case "Bus":
           name = RoleType.bus;
+          _routesController.add(null);
+          routeType = DriverType.bus;
           break;
         default:
           name = RoleType.customer;
@@ -106,6 +120,8 @@ class ApiClient {
     auth = Authenticated(session: session, roles: roles);
     _authenticationController.add(null);
     authenticationStatus = AuthenticationStatus.authenticated;
+
+    getRoutes();
   }
 
   Future<void> signIn(String email, String password) async {
@@ -155,7 +171,7 @@ class ApiClient {
 
   Future<void> getRoutes() async {
     var response = await http.get(
-      Uri.http(url, "api/v1/routes"),
+      Uri.http(url, "api/v1/route"),
       headers: {"Content-Type": "application/json"}
     );
 
@@ -165,9 +181,10 @@ class ApiClient {
     try {
       json = jsonDecode(response.body);
     } catch (_) {
+      print(body);
       throw body;
     }
-    List<LineRoute> routes = [];
+    var routes = RoleRoute(bus: [], sharedTaxi: []);
     for (var route in json['routes']) {
       String id = route['id'];
       String name = route['name'];
@@ -190,11 +207,21 @@ class ApiClient {
         ));
       }
 
-      routes.add(LineRoute(
-          center: lines.points[0], lines: [lines], name: name,),
-      );
+      switch (type) {
+
+        case VehicleType.Bus:
+          routes.bus.add(LineRoute(type: type, lines: [lines], name: name));
+          break;
+        case VehicleType.SharedTaxi:
+          routes.sharedTaxi.add(LineRoute(type: type, lines: [lines], name: name));
+
+          break;
+      }
     }
 
-
-  }
+    print(routes);
+    route = routes;
+    _routesController.add(null);
+    routeStatus = RouteStatus.loaded;
+ }
 }

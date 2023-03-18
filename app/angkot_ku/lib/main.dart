@@ -9,11 +9,9 @@ import 'client/ApiClient.dart';
 import 'client/Role.dart';
 
 void main() {
-  var route = createDummyRoute();
   var apiClient = ApiClient(url: "192.168.2.34:3000");
   runApp(
     MyApp(
-      routes: route,
       apiClient: apiClient,
     ),
   );
@@ -22,11 +20,9 @@ void main() {
 class MyApp extends StatefulWidget {
   const MyApp({
     super.key,
-    required this.routes,
     required this.apiClient,
   });
 
-  final RoleRoute routes;
   final ApiClient apiClient;
 
   @override
@@ -37,6 +33,10 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     widget.apiClient.authenticationStream.listen((_) {
+      setState(() {});
+    });
+
+    widget.apiClient.routeStream.listen((_) {
       setState(() {});
     });
     super.initState();
@@ -63,28 +63,30 @@ class _MyAppState extends State<MyApp> {
         builder: (context) {
           switch (widget.apiClient.authenticationStatus) {
             case AuthenticationStatus.authenticated:
-              switch (widget.apiClient.auth!.roles[0].name) {
-                case RoleType.customer:
-                  return HomeUserLayout(
-                    routes: widget.routes,
-                    apiClient: widget.apiClient,
-                  );
-                case RoleType.sharedTaxi:
-                  return HomeUserLayout(
-                    routes: widget.routes,
-                    apiClient: widget.apiClient,
-                  );
-                case RoleType.bus:
-                  return  HomeUserLayout(
-                    routes: widget.routes,
-                    apiClient: widget.apiClient,
-                  );
-                  //   HomeBus(
-                  //   apiClient: widget.apiClient,
-                  //   routes: widget.routes.bus,
-                  // );
+              var route = widget.apiClient.route;
+              if (route != null) {
+                switch (widget.apiClient.auth!.roles[0].name) {
+                  case RoleType.customer:
+                    return HomeUserLayout(
+                      routes: route,
+                      apiClient: widget.apiClient,
+                    );
+                  case RoleType.sharedTaxi:
+                    return HomeUserLayout(
+                      routes: route,
+                      apiClient: widget.apiClient,
+                    );
+                  case RoleType.bus:
+                    return  HomeUserLayout(
+                      routes: route,
+                      apiClient: widget.apiClient,
+                    );
+                  }
+              }else {
+                return CircularProgressIndicator();
               }
-            default:
+              break;
+              default:
               return LoginLayout(
                 apiClient: widget.apiClient,
                 onLoggedIn: () {

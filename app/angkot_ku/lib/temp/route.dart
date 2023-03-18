@@ -1,3 +1,4 @@
+import 'package:angkot_ku/client/VehicleType.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -6,12 +7,14 @@ import '../client/ApiClient.dart';
 class LineRoute {
   const LineRoute({
     required this.name,
-    required this.center,
+    // required this.center,
+    required this.type,
     required this.lines,
   });
 
   final String name;
-  final LatLng center;
+  // final LatLng center;
+  final VehicleType type;
   final List<Lines> lines;
 }
 
