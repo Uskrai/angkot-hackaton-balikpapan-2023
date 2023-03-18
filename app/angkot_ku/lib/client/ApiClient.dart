@@ -170,6 +170,28 @@ class ApiClient {
     _authenticationController.add(null);
   }
 
+  ApiWebsocketClient createCustomer(
+    LineRoute route,
+    Customer customer,
+    DriverType driver,
+  ) {
+    return CustomerWebsocketClient(url, route, customer, driver);
+  }
+
+  ApiWebsocketClient createSharedTaxi(
+    LineRoute route,
+    SharedTaxi sharedTaxi,
+  ) {
+    return SharedTaxiWebsocketClient(url, route, sharedTaxi);
+  }
+
+  ApiWebsocketClient createBus(
+    LineRoute route,
+    Bus bus,
+  ) {
+    return BusWebsocketClient(url, route, bus);
+  }
+
   Future<void> getRoutes() async {
     var response = await http.get(
       Uri.http(url, "api/v1/route"),
