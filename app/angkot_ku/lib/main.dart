@@ -1,6 +1,5 @@
 import 'package:angkot_ku/authentication/login_layout.dart';
-import 'package:angkot_ku/temp/dummy_route.dart';
-import 'package:angkot_ku/temp/route.dart';
+import 'package:angkot_ku/client/User.dart';
 import 'package:angkot_ku/user/user_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
@@ -74,26 +73,37 @@ class _MyAppState extends State<MyApp> {
                     );
                   case RoleType.sharedTaxi:
                     return AngkotHomeLayout(
-                      roleRoutes: route,
-                      apiClient: widget.apiClient,
-                    );
+                        routes: route.sharedTaxi,
+                        apiClient: widget.apiClient,
+                        createWebsocketClient: (route, location) {
+                          return widget.apiClient.createSharedTaxi(
+                            route,
+                            InitialSharedTaxi(location: location),
+                          );
+                        });
                   case RoleType.bus:
-                    return  HomeUserLayout(
-                      routes: route,
+                    return AngkotHomeLayout(
+                      routes: route.bus,
                       apiClient: widget.apiClient,
+                      createWebsocketClient: (route, location) {
+                        return widget.apiClient.createBus(
+                          route,
+                          InitialBus(location: location),
+                        );
+                      },
                     );
-                  }
-              }else {
+                }
+              } else {
                 return CircularProgressIndicator();
               }
-              default:
+            default:
               return LoginLayout(
                 apiClient: widget.apiClient,
                 onLoggedIn: () {
                   setState(() {});
                 },
               );
-              // return HomeUserLayout();
+            // return HomeUserLayout();
           }
         },
       ),

@@ -43,7 +43,6 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
   void initState() {
     super.initState();
     initWebsocket();
-
   }
 
   @override
@@ -146,7 +145,7 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
                 markers: [
                   if (websocket != null)
                     for (var user in websocket.users.map(
-                          (it) => markerFromUser(it),
+                      (it) => markerFromUser(it),
                     ))
                       if (user != null) user,
                   Marker(
@@ -166,53 +165,52 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
                   Marker(
                       point: LatLng(-1.278407, 116.822300),
                       builder: (context) => GestureDetector(
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Container(
-                                padding: EdgeInsets.all(20),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.directions_bus,
-                                      size: 80,
-                                      color: Colors.grey[400],
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Container(
+                                    padding: EdgeInsets.all(20),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.directions_bus,
+                                          size: 80,
+                                          color: Colors.grey[400],
+                                        ),
+                                        SizedBox(height: 20),
+                                        Text(
+                                          'Ahmad Submul',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          'ID: ANGKOT215',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        SizedBox(height: 40),
+                                        FloatingActionButton(
+                                          onPressed: () {},
+                                          child: Icon(
+                                            Icons.waving_hand,
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(height: 20),
-                                    Text(
-                                      'Ahmad Submul',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      'ID: ANGKOT215',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    SizedBox(height: 40),
-                                    FloatingActionButton(
-                                      onPressed: () {},
-                                      child: Icon(
-                                        Icons.waving_hand,
-                                        size: 30,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                        child: Image.asset("assets/icon/shared-taxi.png"),
-                      )
-                  ),
+                            child: Image.asset("assets/icon/shared-taxi.png"),
+                          )),
                 ],
               ),
             ],
@@ -336,21 +334,22 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
             children: <Widget>[
               ListTile(
                 title: Text('Orderan Masuk'),
-                subtitle: Text('Apakah Anda ingin menerima atau menolak orderan ini?'),
+                subtitle: Text(
+                    'Apakah Anda ingin menerima atau menolak orderan ini?'),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   OutlinedButton(
-                      onPressed: () {
-                        // Disini Fatur
-                      },
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: Colors.blue, width: 2),
-                        ),
+                    onPressed: () {
+                      // Disini Fatur
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Colors.blue, width: 2),
                       ),
+                    ),
                     child: Text('Tombol dengan border'),
                   ),
                   ElevatedButton(

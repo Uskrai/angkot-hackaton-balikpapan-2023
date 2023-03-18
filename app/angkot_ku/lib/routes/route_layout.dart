@@ -63,7 +63,7 @@ class RouteLayout extends StatefulWidget {
     required this.routes,
   });
 
-  String route = "";
+  final String route;
   final List<LineRoute> routes;
   final void Function(LineRoute) onPressRoute;
   final ApiClient apiClient;

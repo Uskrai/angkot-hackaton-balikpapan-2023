@@ -123,7 +123,6 @@ class _HomeUserInnerWidgetState extends State<HomeUserInnerWidget> {
     final List<Widget> widgetOptions = <Widget>[
       Scaffold(
         body: UserMapLayout(
-          key: const Key("bus"),
           routes: widget.routes.bus,
           apiClient: widget.apiClient,
           center: widget.center,
