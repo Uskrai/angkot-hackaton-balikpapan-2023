@@ -16,6 +16,7 @@ class UserMapLayout extends StatefulWidget {
   const UserMapLayout({
     super.key,
     required this.routes,
+    required this.currentRoute,
     required this.apiClient,
     required this.center,
     required this.onPressRoute,
@@ -27,6 +28,7 @@ class UserMapLayout extends StatefulWidget {
   final LatLng center;
   final Function(LineRoute) onPressRoute;
   final ApiWebsocketClient? websocket;
+  final LineRoute? currentRoute;
 
   @override
   State<StatefulWidget> createState() => _UserMapLayoutState();
@@ -34,6 +36,8 @@ class UserMapLayout extends StatefulWidget {
 
 class _UserMapLayoutState extends State<UserMapLayout> {
   final String _route = "Pilih Jalan..";
+
+  LatLng? currentLocation;
 
   @override
   void initState() {
@@ -77,14 +81,22 @@ class _UserMapLayoutState extends State<UserMapLayout> {
         var _ = await checkPermission();
         var it = Geolocator.getPositionStream();
 
-        StreamSubscription<Position>? listener;
-        listener = it.listen((event) {
+        StreamSubscription<Position>? listen;
+        listen = it.listen((event) {
           var latlng = LatLng(event.latitude, event.longitude);
 
           if (mounted && !websocket.isClosed()) {
             websocket.changeLocation(latlng);
-          } else {
-            listener?.cancel();
+          }
+
+          if (mounted) {
+            setState(() {
+              currentLocation = latlng;
+            });
+          }
+
+          if (!mounted) {
+            listen?.cancel();
           }
         });
 
@@ -100,13 +112,14 @@ class _UserMapLayoutState extends State<UserMapLayout> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    var currentRoute = widget.currentRoute;
+    var websocket = widget.websocket;
     return Scaffold(
       body: Stack(
         children: [
           FlutterMap(
             options: MapOptions(
               center: widget.center,
-              // center: widget.client.currentUser.location,
               zoom: 16,
             ),
             children: [
@@ -115,6 +128,38 @@ class _UserMapLayoutState extends State<UserMapLayout> {
                 minZoom: 0,
                 urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 userAgentPackageName: "org.github.uskrai.angkot",
+              ),
+              PolylineLayer(
+                polylineCulling: true,
+                polylines: [
+                  if (currentRoute != null)
+                    for (var line in currentRoute.lines)
+                      Polyline(
+                        points: line.points,
+                        color: Colors.blue,
+                        strokeWidth: 3,
+                      ),
+                  // Polyline(points: points, color: Colors.red)
+                ],
+              ),
+              MarkerLayer(
+                markers: [
+                  if (websocket != null)
+                    for (var user in websocket.users.map(
+                      (it) => markerFromUser(it),
+                    ))
+                      if (user != null) user,
+                  Marker(
+                    point: websocket != null
+                        ? websocket.currentUser.location
+                        : (currentLocation ?? widget.center),
+                    builder: (context) {
+                      return Image.asset("assets/icon/user.png");
+                    },
+                    width: 20,
+                    height: 20,
+                  ),
+                ],
               ),
             ],
           ),
@@ -160,7 +205,7 @@ class _UserMapLayoutState extends State<UserMapLayout> {
                   children: [
                     IconButton(onPressed: () {}, icon: const Icon(Icons.route)),
                     Text(
-                      _route,
+                      widget.currentRoute?.name ?? _route,
                       style: const TextStyle(
                         color: CupertinoColors.systemGrey2,
                       ),

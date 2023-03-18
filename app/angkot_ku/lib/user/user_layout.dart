@@ -77,6 +77,7 @@ class _HomeUserInnerWidgetState extends State<HomeUserInnerWidget> {
   int _selectedIndex = 0;
   int _count = 0;
   ApiWebsocketClient? _api;
+  LineRoute? _route;
 
   final driverType = {
     0: DriverType.bus,
@@ -110,6 +111,7 @@ class _HomeUserInnerWidgetState extends State<HomeUserInnerWidget> {
 
     setState(() {
       _api = api;
+      _route = route;
       _reset();
     });
 
@@ -129,6 +131,7 @@ class _HomeUserInnerWidgetState extends State<HomeUserInnerWidget> {
             _onPressRoute(context, route, DriverType.bus);
           },
           websocket: _api,
+          currentRoute: _route,
         ),
       ),
       Scaffold(
@@ -141,6 +144,7 @@ class _HomeUserInnerWidgetState extends State<HomeUserInnerWidget> {
             _onPressRoute(context, route, DriverType.sharedTaxi);
           },
           websocket: _api,
+          currentRoute: _route,
         ),
       )
     ];
