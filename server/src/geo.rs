@@ -139,6 +139,15 @@ pub enum StateMessage {
     NewUser(String),
     UpdateLocation(String),
     CloseUser(String),
+    PickupRequest {
+        requester_id: String,
+        requested_id: String,
+    },
+    PickupResponse {
+        requester_id: String,
+        requested_id: String,
+        accepted: bool,
+    },
 }
 
 pub struct Inner {
@@ -286,12 +295,23 @@ pub struct UpdateLocation {
     location: Location,
 }
 
+// PickupRequest flow:
+// User send MessageFromUser::PickupRequest with requested user as parameter.
+// then server send MessageToUser::PickupRequest to the requested user with the requester id as parameter
+// if the requested user accept, then requested user will send back MessageFromUser::PickupResponse with
+// accepted true, then server will send MessageToUser::PickupResponse back to requester user with accepted: true
+// if the requested user reject, then requested user will send back MessageFromUser::PickupResponse with
+// accepted false, then server will send MessageToUser::PickupResponse back to requester user with accepted: false
+
 // message that user receive
 #[derive(Serialize, Debug)]
 pub enum MessageToUser {
     NewUser { id: String, user: User },
     UpdateLocation { id: String, location: Location },
     RemoveUser { id: String },
+
+    PickupRequest { id: String },
+    PickupResponse { id: String, accepted: bool },
 }
 
 // message that user send
@@ -299,6 +319,9 @@ pub enum MessageToUser {
 pub enum MessageFromUser<U> {
     InitialMessage(U),
     UpdateLocation { location: Location },
+
+    PickupRequest { id: String },
+    PickupResponse { id: String, accept: bool },
 }
 
 pub struct UserState {
@@ -385,6 +408,34 @@ impl UserState {
                             .ok();
                     }
                 }
+            }
+            StateMessage::PickupRequest {
+                requester_id,
+                requested_id,
+            } => {
+                if self.id != requested_id {
+                    return false;
+                }
+
+                self.send_force(MessageToUser::PickupRequest { id: requester_id })
+                    .await
+                    .ok();
+            }
+            StateMessage::PickupResponse {
+                requested_id,
+                requester_id,
+                accepted,
+            } => {
+                if self.id != requester_id {
+                    return false;
+                }
+
+                self.send_force(MessageToUser::PickupResponse {
+                    id: requested_id,
+                    accepted,
+                })
+                .await
+                .ok();
             }
             StateMessage::CloseUser(new_id) => {
                 if new_id == self.id {
@@ -512,6 +563,41 @@ where
                                     state_sender
                                         .send(StateMessage::UpdateLocation(current_id.clone())),
                                 )
+                            }
+                            MessageFromUser::PickupRequest { id } => {
+                                match state.list.lock().get_mut(&id).and_then(|it| it.as_mut()) {
+                                    Some(it) => {
+                                        // only allow customer
+                                        match it {
+                                            User::Customer(_) => {}
+                                            User::SharedTaxi(_) | User::Bus(_) => continue,
+                                        }
+                                    }
+                                    None => continue,
+                                }
+
+                                Some(state_sender.send(StateMessage::PickupRequest {
+                                    requester_id: current_id.clone(),
+                                    requested_id: id,
+                                }))
+                            }
+                            MessageFromUser::PickupResponse { id, accept } => {
+                                match state.list.lock().get_mut(&id).and_then(|it| it.as_mut()) {
+                                    Some(it) => {
+                                        // only disallow customer
+                                        match it {
+                                            User::Customer(_) => continue,
+                                            User::SharedTaxi(_) | User::Bus(_) => {}
+                                        }
+                                    }
+                                    None => continue,
+                                }
+
+                                Some(state_sender.send(StateMessage::PickupResponse {
+                                    requester_id: id,
+                                    requested_id: current_id.clone(),
+                                    accepted: accept,
+                                }))
                             }
                         };
 
