@@ -148,8 +148,21 @@ class _LoginLayoutState extends State<LoginLayout> {
                     height: 47,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        try {
+                          setState(() {
+                            _isLoading = true;
+                          });
 
+                          
+
+                        } catch (e) {
+                          //TODO()
+                        }
+
+                        setState(() {
+                          _isLoading = false;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(

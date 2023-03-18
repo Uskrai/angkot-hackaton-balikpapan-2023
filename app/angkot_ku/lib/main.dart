@@ -1,17 +1,16 @@
 import 'package:angkot_ku/authentication/login_layout.dart';
+import 'package:angkot_ku/user/user_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 
 import 'authentication/register_layout.dart';
 import 'client/ApiClient.dart';
-import 'client/Role.dart';
 import 'delete/dummy_route.dart';
 import 'delete/route.dart';
 
 void main() {
-
   var route = createDummyRoute();
-  var apiClient = ApiClient(url: "10.2.49.126:3000");
+  var apiClient = ApiClient(url: "192.168.2.34:3000");
   runApp(
     MyApp(
       routes: route,
@@ -82,12 +81,14 @@ class _MyAppState extends State<MyApp> {
             //       );
             //   }
             default:
-              return RegisterLayout(
-                apiClient: widget.apiClient,
-                onLoggedIn: () {
-                  setState(() {});
-                },
-              );
+              // it should be login layout
+              // return LoginLayout(
+              //   apiClient: widget.apiClient,
+              //   onLoggedIn: () {
+              //     setState(() {});
+              //   },
+              // );
+              return HomeUserLayout();
           }
         },
       ),
