@@ -97,7 +97,7 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
     );
 
     channel.stream.listen(
-          (event) {
+      (event) {
         var json = jsonDecode(event);
 
         if (handleReceive(json, _users)) {
@@ -285,16 +285,26 @@ bool handleReceive(dynamic json, HashMap<String, User> users) {
       user = userType["SharedTaxi"];
     } else if (userType["Customer"] != null) {
       user = userType["Customer"];
+    } else if (userType["Bus"] != null) {
+      user = userType["Bus"];
     }
 
+    String email = user['email'];
     var location = decodeLatLng(user["location"]);
 
     if (userType["SharedTaxi"] != null) {
       users[id] = SharedTaxi(
+        email: email,
         location: location,
       );
     } else if (userType["Customer"] != null) {
       users[id] = Customer(
+        email: email,
+        location: location,
+      );
+    } else if (userType["Bus"] != null) {
+      users[id] = Bus(
+        email: email,
         location: location,
       );
     }
@@ -321,3 +331,4 @@ bool handleReceive(dynamic json, HashMap<String, User> users) {
 
   return isHandled;
 }
+
