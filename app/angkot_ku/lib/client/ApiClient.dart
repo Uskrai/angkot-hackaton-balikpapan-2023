@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:angkot_ku/client/User.dart';
 import 'package:angkot_ku/client/VehicleType.dart';
+import 'package:angkot_ku/client/websocket/ApiWebsocket.dart';
 import 'package:angkot_ku/temp/route.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -176,14 +177,11 @@ class ApiClient {
     );
 
     var body = response.body;
-    print("body");
-    print(body);
     dynamic json;
 
     try {
       json = jsonDecode(response.body);
     } catch (_) {
-      print(body);
       throw body;
     }
 
@@ -216,16 +214,15 @@ class ApiClient {
       switch (type) {
 
         case VehicleType.Bus:
-          bus.add(LineRoute(type: type, lines: [lines], name: name));
+          bus.add(LineRoute(id: id, type: type, lines: [lines], name: name));
           break;
         case VehicleType.SharedTaxi:
-          sharedTaxi.add(LineRoute(type: type, lines: [lines], name: name));
+          sharedTaxi.add(LineRoute(id: id, type: type, lines: [lines], name: name));
           break;
       }
     }
     var routes = RoleRoute(bus: bus, sharedTaxi: sharedTaxi);
 
-    print(routes);
     route = routes;
     _routesController.add(null);
     routeStatus = RouteStatus.loaded;
