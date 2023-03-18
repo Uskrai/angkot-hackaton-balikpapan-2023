@@ -159,12 +159,12 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                           ),
                         ),
                       ),
-                      items: ['Penumpang', 'Angkot', 'Bus']
-                          .map((label) => DropdownMenuItem(
-                        value: label,
-                        child: Text(label),
-                      ))
-                          .toList(),
+                      items: ["Penumpang", "Angkot", "Bis"].map((String items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items),
+                        );
+                      }).toList(),
                       onChanged: (String? value) {
                         _type = value!;
                       },
