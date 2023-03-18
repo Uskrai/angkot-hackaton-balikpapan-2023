@@ -1,3 +1,4 @@
+import 'package:angkot_ku/user/user_angkot_layout.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -35,8 +36,8 @@ class _HomeUserLayoutState extends State<HomeUserLayout>{
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Menu Angkot',
+    Scaffold(
+      body: UserAngkotLayout(),
     ),
     FlutterMap(
       options: MapOptions(

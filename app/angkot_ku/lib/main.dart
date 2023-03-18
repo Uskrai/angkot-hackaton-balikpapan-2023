@@ -3,7 +3,6 @@ import 'package:angkot_ku/user/user_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 
-import 'authentication/register_layout.dart';
 import 'client/ApiClient.dart';
 import 'client/Role.dart';
 import 'delete/dummy_route.dart';
