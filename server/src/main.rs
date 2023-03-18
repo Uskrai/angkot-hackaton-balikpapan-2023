@@ -6,6 +6,7 @@ use migration::MigratorTrait;
 use sea_orm::{ConnectOptions, Database};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+mod error;
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
