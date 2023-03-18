@@ -178,7 +178,6 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                     child: ElevatedButton(
                       onPressed: () async {
                         try {
-
                           setState(() {
                             isLoading = true;
                           });
@@ -203,12 +202,6 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                                 role
                               ]);
                           widget.onLoggedIn.call();
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("suscces"),
-                            ),
-                          );
 
                           Navigator.pop(context);
                         } catch(e) {
