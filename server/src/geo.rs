@@ -288,7 +288,7 @@ pub struct UpdateLocation {
 
 // message that user receive
 #[derive(Serialize, Debug)]
-pub enum UserReceiveMessage {
+pub enum MessageToUser {
     NewUser { id: String, user: User },
     UpdateLocation { id: String, location: Location },
     RemoveUser { id: String },
@@ -296,7 +296,7 @@ pub enum UserReceiveMessage {
 
 // message that user send
 #[derive(Deserialize)]
-pub enum UserSendMessage<U> {
+pub enum MessageFromUser<U> {
     InitialMessage(U),
     UpdateLocation { location: Location },
 }
@@ -325,7 +325,7 @@ impl UserState {
         }
     }
 
-    async fn send_force(&mut self, msg: UserReceiveMessage) -> Result<(), axum::Error> {
+    async fn send_force(&mut self, msg: MessageToUser) -> Result<(), axum::Error> {
         tracing::trace!("sending to {} {:?}", self.id, msg);
         let it = match serde_json::to_string(&msg) {
             Ok(it) => it,
@@ -349,7 +349,7 @@ impl UserState {
                     tracing::trace!("insert {new_id} in {}", self.id);
                     self.users.insert(new_id.clone());
 
-                    self.send_force(UserReceiveMessage::NewUser { id: new_id, user })
+                    self.send_force(MessageToUser::NewUser { id: new_id, user })
                         .await
                         .ok();
                 }
@@ -361,7 +361,7 @@ impl UserState {
 
                 if self.users.contains(&new_id) {
                     if let Some(user) = self.should_send_id(&new_id) {
-                        self.send_force(UserReceiveMessage::UpdateLocation {
+                        self.send_force(MessageToUser::UpdateLocation {
                             id: new_id,
                             location: user.location().clone(),
                         })
@@ -371,7 +371,7 @@ impl UserState {
                         tracing::trace!("remove {new_id} in {}", self.id);
                         self.users.remove(&new_id);
 
-                        self.send_force(UserReceiveMessage::RemoveUser { id: new_id })
+                        self.send_force(MessageToUser::RemoveUser { id: new_id })
                             .await
                             .ok();
                     }
@@ -380,7 +380,7 @@ impl UserState {
                         tracing::trace!("insert {new_id} in {}", self.id);
                         self.users.insert(new_id.to_string());
 
-                        self.send_force(UserReceiveMessage::NewUser { id: new_id, user })
+                        self.send_force(MessageToUser::NewUser { id: new_id, user })
                             .await
                             .ok();
                     }
@@ -395,7 +395,7 @@ impl UserState {
                     tracing::trace!("remove {new_id} in {}", self.id);
                     self.users.remove(&new_id);
 
-                    self.send_force(UserReceiveMessage::RemoveUser { id: new_id })
+                    self.send_force(MessageToUser::RemoveUser { id: new_id })
                         .await
                         .ok();
                 }
@@ -465,7 +465,7 @@ where
                 }
                 DMessage::WSMessage(msg) => match msg {
                     WSMessage::Text(text) => {
-                        let message: UserSendMessage<U> = match serde_json::from_str(&text) {
+                        let message: MessageFromUser<U> = match serde_json::from_str(&text) {
                             Ok(it) => it,
                             Err(err) => {
                                 tracing::error!("{}", err);
@@ -474,7 +474,7 @@ where
                         };
 
                         let send_result = match message {
-                            UserSendMessage::InitialMessage(request) => {
+                            MessageFromUser::InitialMessage(request) => {
                                 match state.0.list.lock().get_mut(&current_id) {
                                     Some(it) => {
                                         if it.is_some() {
@@ -497,7 +497,7 @@ where
 
                                 Some(state_sender.send(StateMessage::NewUser(current_id.clone())))
                             }
-                            UserSendMessage::UpdateLocation { location } => {
+                            MessageFromUser::UpdateLocation { location } => {
                                 match state
                                     .list
                                     .lock()
