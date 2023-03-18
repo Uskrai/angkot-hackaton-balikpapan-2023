@@ -1,3 +1,4 @@
+import 'package:angkot_ku/routes/angkot_routes_layout.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -7,9 +8,9 @@ import 'angkot_log_layout.dart';
 import 'angkot_review_layout.dart';
 
 class AngkotHomeLayout extends StatefulWidget {
-  const AngkotHomeLayout({super.key, required this.routes, required this.apiClient});
+  const AngkotHomeLayout({super.key, required this.roleRoutes, required this.apiClient});
 
-  final RoleRoute routes;
+  final RoleRoute roleRoutes;
   final ApiClient apiClient;
 
   @override
@@ -19,6 +20,7 @@ class AngkotHomeLayout extends StatefulWidget {
 
 class _AngkotHomeLayoutState extends State<AngkotHomeLayout> {
   int _selectedIndex = 0;
+  String _route = "Pilih Jalan..";
 
   final List<Widget> widgetOptions = <Widget>[
     Scaffold(
@@ -47,10 +49,19 @@ class _AngkotHomeLayoutState extends State<AngkotHomeLayout> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-
+          Navigator.push(context, MaterialPageRoute(builder: (context) =>
+              AngkotRoutesLayout(
+                route: _route,
+                apiClient: widget.apiClient,
+                onPressRoute: (route) {
+                  // return onPressRoute(context, route)
+                },
+                routes: widget.roleRoutes.sharedTaxi,
+              )
+          ));
         },
         backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.directions_car),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
