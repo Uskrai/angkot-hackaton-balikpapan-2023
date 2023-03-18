@@ -1,24 +1,10 @@
 use std::net::SocketAddr;
 
-use axum::{extract::FromRef, Router};
+use angkot::{api, geo, geo::GeoState, AppState};
+use axum::Router;
 use migration::MigratorTrait;
-use sea_orm::{ConnectOptions, Database, DatabaseConnection};
+use sea_orm::{ConnectOptions, Database};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-
-use crate::geo::GeoState;
-
-mod api;
-mod entity;
-mod error;
-mod geo;
-mod session;
-mod user;
-
-#[derive(FromRef, Clone)]
-pub struct AppState {
-    connection: DatabaseConnection,
-    geo: GeoState,
-}
 
 #[tokio::main]
 async fn main() {
@@ -57,6 +43,13 @@ async fn main() {
                     "/changepassword",
                     axum::routing::post(api::v1::auth::change_password),
                 ),
+        )
+        .nest(
+            "/route",
+            Router::new()
+                .route("/", axum::routing::get(api::v1::route::index))
+                .route("/", axum::routing::post(api::v1::route::create))
+                .route("/:id", axum::routing::delete(api::v1::route::delete)),
         )
         .nest(
             "/role",

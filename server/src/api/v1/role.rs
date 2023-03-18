@@ -1,5 +1,5 @@
 use axum::Extension;
-use sea_orm::{prelude::Uuid, DatabaseConnection, EntityTrait};
+use sea_orm::{DatabaseConnection, EntityTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::{entity::role, error::Error};
