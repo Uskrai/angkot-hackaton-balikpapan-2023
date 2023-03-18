@@ -22,9 +22,6 @@ class _RouteLayoutState extends State<RouteLayout> {
     return Scaffold(
       body: Column(
         children: [
-          Container(
-            // Menu
-          ),
           GestureDetector(
             onTap: (){
 
@@ -72,7 +69,41 @@ class _RouteLayoutState extends State<RouteLayout> {
                 ),
               ),
             ),
-          )
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var it in ["test", "dua"])
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    children: [Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(it),
+                          Row(
+                            children: const [
+                              Text("1"),
+                              Icon(
+                                Icons.directions_bus_sharp,
+                                color: Colors.green,
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                      const Padding(padding: EdgeInsets.symmetric(
+                        vertical: 8
+                      )),
+                      const Divider()
+                    ]
+                  ),
+                ),
+            ],
+          ),
         ],
       )
     );
