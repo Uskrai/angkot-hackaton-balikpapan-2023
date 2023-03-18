@@ -50,8 +50,11 @@ class _HomeUserLayoutState extends State<HomeUserLayout>{
   @override
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
-      const Scaffold(
-        body: UserBisLayout(),
+      Scaffold(
+        body: UserBisLayout(
+          roleRoutes: widget.routes,
+          apiClient: widget.apiClient,
+        ),
       ),
       Scaffold(
         body: UserAngkotLayout(

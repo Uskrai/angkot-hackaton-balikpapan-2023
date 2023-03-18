@@ -176,6 +176,8 @@ class ApiClient {
     );
 
     var body = response.body;
+    print("body");
+    print(body);
     dynamic json;
 
     try {
@@ -184,7 +186,9 @@ class ApiClient {
       print(body);
       throw body;
     }
-    var routes = RoleRoute(bus: [], sharedTaxi: []);
+
+    List<LineRoute> bus = List.empty(growable: true);
+    List<LineRoute> sharedTaxi = List.empty(growable: true);
     for (var route in json['routes']) {
       String id = route['id'];
       String name = route['name'];
@@ -199,25 +203,27 @@ class ApiClient {
           break;
       }
 
-      Lines lines = const Lines(name: "", points: []);
+      List<LatLng> points = List.empty(growable: true);
       for (var line in route['lines']) {
-        lines.points.add(LatLng(
+        points.add(LatLng(
             line['latitude'],
             line['longitude']
         ));
       }
+      Lines lines =  Lines(name: "", points: points);
+
 
       switch (type) {
 
         case VehicleType.Bus:
-          routes.bus.add(LineRoute(type: type, lines: [lines], name: name));
+          bus.add(LineRoute(type: type, lines: [lines], name: name));
           break;
         case VehicleType.SharedTaxi:
-          routes.sharedTaxi.add(LineRoute(type: type, lines: [lines], name: name));
-
+          sharedTaxi.add(LineRoute(type: type, lines: [lines], name: name));
           break;
       }
     }
+    var routes = RoleRoute(bus: bus, sharedTaxi: sharedTaxi);
 
     print(routes);
     route = routes;
