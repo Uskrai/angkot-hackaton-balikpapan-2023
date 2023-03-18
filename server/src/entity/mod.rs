@@ -3,6 +3,8 @@
 pub mod prelude;
 
 pub mod role;
+pub mod route;
+pub mod sea_orm_active_enums;
 pub mod session;
 pub mod user;
 pub mod user_role;
