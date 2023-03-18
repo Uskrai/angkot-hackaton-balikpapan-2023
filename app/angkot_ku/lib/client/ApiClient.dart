@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'Authenticated.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 
 import 'Role.dart';
 
@@ -65,50 +66,6 @@ class ApiClient {
     authenticationStatus = AuthenticationStatus.authenticated;
   }
 
-  Future<void> signIn(String email, String password) async {
-    var response = await http.post(
-      Uri.http(url, "api/v1/auth/login"),
-      body: jsonEncode(
-        {"email": email, "password": password},
-      ),
-      headers: {"Content-Type": "application/json"},
-    );
-
-    handleLoginResponse(response);
-  }
-
-  Future<void> signUp(
-      String email,
-      String password,
-      List<RoleType> role,
-      ) async {
-    var response = await http.post(Uri.http(url, "api/v1/auth/register"),
-        body: jsonEncode(
-          {
-            "email": email,
-            "password": password,
-            "roles": role.map((e) {
-              switch (e) {
-                case RoleType.customer:
-                  return {"id": 1};
-                case RoleType.sharedTaxi:
-                  return {"id": 2};
-                case RoleType.bus:
-                  return {"id": 3};
-              }
-            }).toList()
-          },
-        ),
-        headers: {"Content-Type": "application/json"});
-
-    handleLoginResponse(response);
-  }
-
-  Future<void> logOut() async {
-    authenticationStatus = AuthenticationStatus.unkown;
-    auth = null;
-    _authenticationController.add(null);
-  }
 
   // ApiWebSocket here
 }
