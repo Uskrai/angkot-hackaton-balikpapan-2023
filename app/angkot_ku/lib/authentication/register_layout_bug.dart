@@ -1,10 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../client/ApiClient.dart';
 import '../constant.dart';
 
-class RegisterLayout extends StatelessWidget {
-  const RegisterLayout({super.key});
+class RegisterLayout extends StatefulWidget {
+  const RegisterLayout({super.key,
+    required this.apiClient,
+    required this.onLoggedIn});
+
+  final ApiClient apiClient;
+  final void Function() onLoggedIn;
+
+  @override
+  State<StatefulWidget> createState() => _RegisterLayoutState();
+}
+
+class _RegisterLayoutState extends State<RegisterLayout>{
+
+  String _email = "";
+  String _password = "";
+  String _type = "Penumpang";
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +77,10 @@ class RegisterLayout extends StatelessWidget {
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
+                      onChanged: (value) => _email = value,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
-                        labelText: 'Kata Sandi',
+                        labelText: 'Masukkan Email Kamu',
                         labelStyle: const TextStyle(
                           color: Color.fromRGBO(26, 37, 42, 1),
                           fontFamily: 'Poppins',
@@ -95,6 +113,7 @@ class RegisterLayout extends StatelessWidget {
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
+                      onChanged: (value) => _password = value,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         labelText: 'Kata Sandi',
@@ -139,13 +158,15 @@ class RegisterLayout extends StatelessWidget {
                           ),
                         ),
                       ),
-                      items: ['Option 1', 'Option 2', 'Option 3']
+                      items: ['Penumpang', 'Angkot', 'Bus']
                           .map((label) => DropdownMenuItem(
                         value: label,
                         child: Text(label),
                       ))
                           .toList(),
-                      onChanged: (value) {},
+                      onChanged: (String? value) {
+                        _type = value!;
+                      },
                       hint: const Text('Select an option'),
                     ),
                   ),
@@ -155,10 +176,10 @@ class RegisterLayout extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => RegisterLayout())
-                        );
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(builder: (context) => RegisterLayout())
+                        // );
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
