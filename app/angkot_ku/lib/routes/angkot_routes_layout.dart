@@ -84,22 +84,28 @@ class _AngkotRouteLayoutState extends State<AngkotRoutesLayout> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Column(
-                        children: [Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(it.name),
-                              Row(
-                                children: const [
-                                  Text("1"),
-                                  Icon(
-                                    Icons.directions_bus_sharp,
-                                    color: Colors.green,
-                                  )
-                                ],
-                              )
-                            ],
+                        children: [
+                          InkWell(
+                            onTap: () {
+
+                            },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(it.name),
+                                Row(
+                                  children: const [
+                                    Text("1"),
+                                    Icon(
+                                      Icons.directions_bus_sharp,
+                                      color: Colors.green,
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                           const Padding(padding: EdgeInsets.symmetric(
