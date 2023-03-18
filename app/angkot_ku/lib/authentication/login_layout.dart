@@ -4,7 +4,14 @@ import 'package:angkot_ku/constant.dart';
 import 'package:flutter/material.dart';
 
 class LoginLayout extends StatelessWidget {
-  const LoginLayout({super.key});
+  const LoginLayout({
+    super.key,
+    // required this.apiClient, not implemented yet
+    required this.onLoggedIn,
+  });
+
+  // final ApiClient apiClient; not implemented yet
+  final void Function() onLoggedIn;
 
   @override
   Widget build(BuildContext context) {
