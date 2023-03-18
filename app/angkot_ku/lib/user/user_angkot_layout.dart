@@ -21,6 +21,7 @@ class UserAngkotLayout extends StatefulWidget {
 class _UserAngkotLayoutState extends State<UserAngkotLayout> {
 
   String _route = "Pilih Jalan..";
+  late void Function(BuildContext context, LineRoute route) onPressRoute;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,7 @@ class _UserAngkotLayoutState extends State<UserAngkotLayout> {
                     route: _route,
                     apiClient: widget.apiClient,
                     onPressRoute: (route) {
-                      // return (context, route) async
+                      // return onPressRoute(context, route)
                     },
                     routes: widget.roleRoutes.sharedTaxi,
                   )

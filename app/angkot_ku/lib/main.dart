@@ -9,7 +9,7 @@ import 'client/ApiClient.dart';
 import 'client/Role.dart';
 
 void main() {
-  var apiClient = ApiClient(url: "192.168.2.9:3000");
+  var apiClient = ApiClient(url: "192.168.2.35:3000");
   runApp(
     MyApp(
       apiClient: apiClient,
