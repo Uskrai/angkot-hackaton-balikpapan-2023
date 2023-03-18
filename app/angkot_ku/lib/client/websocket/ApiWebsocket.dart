@@ -182,6 +182,12 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
   List<User> get users => _users.values.toList();
   final HashMap<String, User> _users = HashMap();
 
+  void _notifyChange() {
+    if (!isClosed()) {
+      _changedController.add(null);
+    }
+  }
+
   @override
   void connect() {
     var uri = Uri.encodeFull(
@@ -210,7 +216,7 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
       var json = jsonDecode(event);
 
       if (handleReceive(json, _users)) {
-        _changedController.add(null);
+        _notifyChange();
       }
 
       var initial = decodeInitialMessage(json);
