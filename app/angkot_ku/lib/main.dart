@@ -1,12 +1,12 @@
 import 'package:angkot_ku/authentication/login_layout.dart';
+import 'package:angkot_ku/temp/dummy_route.dart';
+import 'package:angkot_ku/temp/route.dart';
 import 'package:angkot_ku/user/user_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 
 import 'client/ApiClient.dart';
 import 'client/Role.dart';
-import 'delete/dummy_route.dart';
-import 'delete/route.dart';
 
 void main() {
   var route = createDummyRoute();
@@ -65,11 +65,20 @@ class _MyAppState extends State<MyApp> {
             case AuthenticationStatus.authenticated:
               switch (widget.apiClient.auth!.roles[0].name) {
                 case RoleType.customer:
-                  return HomeUserLayout();
+                  return HomeUserLayout(
+                    routes: widget.routes,
+                    apiClient: widget.apiClient,
+                  );
                 case RoleType.sharedTaxi:
-                  return HomeUserLayout();
+                  return HomeUserLayout(
+                    routes: widget.routes,
+                    apiClient: widget.apiClient,
+                  );
                 case RoleType.bus:
-                  return  HomeUserLayout();
+                  return  HomeUserLayout(
+                    routes: widget.routes,
+                    apiClient: widget.apiClient,
+                  );
                   //   HomeBus(
                   //   apiClient: widget.apiClient,
                   //   routes: widget.routes.bus,

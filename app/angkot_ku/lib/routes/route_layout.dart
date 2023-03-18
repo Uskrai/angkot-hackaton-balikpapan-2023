@@ -1,13 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../client/ApiClient.dart';
+import '../temp/route.dart';
+
 class RouteLayout extends StatefulWidget {
   RouteLayout({
     super.key,
-    required this.route
+    required this.route,
+    required this.onPressRoute,
+    required this.apiClient,
+    required this.routes,
   });
 
   String route = "";
+  final List<LineRoute> routes;
+  final void Function(LineRoute) onPressRoute;
+  final ApiClient apiClient;
 
   @override
   State<StatefulWidget> createState() => _RouteLayoutState();
@@ -73,7 +82,7 @@ class _RouteLayoutState extends State<RouteLayout> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (var it in ["test", "dua"])
+              for (var it in widget.routes)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Column(
@@ -82,7 +91,7 @@ class _RouteLayoutState extends State<RouteLayout> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(it),
+                          Text(it.name),
                           Row(
                             children: const [
                               Text("1"),

@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../client/ApiClient.dart';
+import '../temp/route.dart';
+
 Future<void> checkPermission() async {
   var locationService = await Geolocator.isLocationServiceEnabled();
   if (!locationService) {
@@ -26,7 +29,12 @@ Future<void> checkPermission() async {
 }
 
 class HomeUserLayout extends StatefulWidget {
-  const HomeUserLayout({super.key});
+  const HomeUserLayout({super.key,
+    required this.routes,
+    required this.apiClient});
+
+  final RoleRoute routes;
+  final ApiClient apiClient;
 
   @override
   State<StatefulWidget> createState() => _HomeUserLayoutState();
@@ -36,30 +44,34 @@ class HomeUserLayout extends StatefulWidget {
 class _HomeUserLayoutState extends State<HomeUserLayout>{
   int _selectedIndex = 0;
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    const Scaffold(
-      body: UserBisLayout(),
-    ),
-    const Scaffold(
-      body: UserAngkotLayout(),
-    )
-  ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   PersistentBottomSheetController? _bottomSheetController;
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> widgetOptions = <Widget>[
+      const Scaffold(
+        body: UserBisLayout(),
+      ),
+      Scaffold(
+        body: UserAngkotLayout(
+          roleRoutes: widget.routes,
+          apiClient: widget.apiClient,
+        ),
+      )
+    ];
+
+    void _onItemTapped(int index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
     return Scaffold(
       body: Center(
         child: Stack(
           children: [
-            _widgetOptions.elementAt(_selectedIndex),
+            widgetOptions.elementAt(_selectedIndex),
           ],
         ),
       ),

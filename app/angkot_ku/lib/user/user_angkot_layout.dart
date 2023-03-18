@@ -3,8 +3,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
+import '../client/ApiClient.dart';
+import '../temp/route.dart';
+
 class UserAngkotLayout extends StatefulWidget {
-  const UserAngkotLayout({super.key});
+  const UserAngkotLayout({super.key,
+    required this.roleRoutes,
+    required this.apiClient});
+
+  final RoleRoute roleRoutes;
+  final ApiClient apiClient;
 
   @override
   State<StatefulWidget> createState() => _UserAngkotLayoutState();
@@ -36,7 +44,15 @@ class _UserAngkotLayoutState extends State<UserAngkotLayout> {
           ),
           GestureDetector(
             onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => RouteLayout(route: _route)
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                  RouteLayout(
+                    route: _route,
+                    apiClient: widget.apiClient,
+                    onPressRoute: (route) {
+                      // return (context, route) async
+                    },
+                    routes: widget.roleRoutes.sharedTaxi,
+                  )
               ));
             },
             child: Container(
