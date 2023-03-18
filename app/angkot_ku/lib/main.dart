@@ -5,6 +5,7 @@ import 'package:flutter_map/plugin_api.dart';
 
 import 'authentication/register_layout.dart';
 import 'client/ApiClient.dart';
+import 'client/Role.dart';
 import 'delete/dummy_route.dart';
 import 'delete/route.dart';
 
@@ -62,27 +63,21 @@ class _MyAppState extends State<MyApp> {
       home: Builder(
         builder: (context) {
           switch (widget.apiClient.authenticationStatus) {
-            // case AuthenticationStatus.authenticated:
-            //   switch (widget.apiClient.auth!.roles[0].name) {
-            //     case RoleType.customer:
-            //       return // TODO()
-            //         HomePassengerWidget(
-            //         routes: widget.routes,
-            //         apiClient: widget.apiClient,
-            //       );
-            //     case RoleType.sharedTaxi:
-            //       return HomeSharedTaxi(
-            //           apiClient: widget.apiClient,
-            //           routes: widget.routes.sharedTaxi);
-            //     case RoleType.bus:
-            //       return HomeBus(
-            //         apiClient: widget.apiClient,
-            //         routes: widget.routes.bus,
-            //       );
-            //   }
+            case AuthenticationStatus.authenticated:
+              switch (widget.apiClient.auth!.roles[0].name) {
+                case RoleType.customer:
+                  return HomeUserLayout();
+                case RoleType.sharedTaxi:
+                  return HomeUserLayout();
+                case RoleType.bus:
+                  return  HomeUserLayout();
+                  //   HomeBus(
+                  //   apiClient: widget.apiClient,
+                  //   routes: widget.routes.bus,
+                  // );
+              }
             default:
-              // it should be login layout
-              return RegisterLayout(
+              return LoginLayout(
                 apiClient: widget.apiClient,
                 onLoggedIn: () {
                   setState(() {});

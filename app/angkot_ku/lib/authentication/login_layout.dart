@@ -76,6 +76,7 @@ class _LoginLayoutState extends State<LoginLayout> {
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
+                      onChanged: (value) => _email = value,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: 'Email Address',
@@ -111,6 +112,7 @@ class _LoginLayoutState extends State<LoginLayout> {
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: TextField(
+                      onChanged: (value) => _password = value,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         labelText: 'Kata Sandi',
@@ -148,8 +150,34 @@ class _LoginLayoutState extends State<LoginLayout> {
                     height: 47,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        try {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          await widget.apiClient.signIn(
+                            _email,
+                            _password,
+                          );
 
+                          widget.onLoggedIn.call();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("login"),
+                            ),
+                          );
+
+                        } catch (e) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                            ),
+                          );
+                        }
+                        setState(() {
+                          _isLoading = false;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(

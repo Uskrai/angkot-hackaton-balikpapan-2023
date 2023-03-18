@@ -205,10 +205,12 @@ class _RegisterLayoutState extends State<RegisterLayout> {
                           widget.onLoggedIn.call();
 
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text("suscces"),
                             ),
                           );
+
+                          Navigator.pop(context);
                         } catch(e) {
                           if (!mounted) return;
 
