@@ -91,6 +91,10 @@ pub async fn login(
     }
 }
 
+pub async fn profile(user: User) -> JsonSuccess<User> {
+    JsonSuccess(user)
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RoleRequest {
     pub id: i32,
