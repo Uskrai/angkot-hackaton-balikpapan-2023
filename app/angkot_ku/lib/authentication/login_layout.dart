@@ -137,7 +137,7 @@ class LoginLayout extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RegisterLayout())
+                    MaterialPageRoute(builder: (context) => RegisterLayout())
                   );
                 },
                 style: ElevatedButton.styleFrom(
