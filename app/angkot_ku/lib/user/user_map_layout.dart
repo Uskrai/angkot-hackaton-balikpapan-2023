@@ -161,6 +161,60 @@ class _UserMapLayoutState extends State<UserMapLayout> {
                   ),
                 ],
               ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: LatLng(-1.278407, 116.822300),
+                    builder: (context) => GestureDetector(
+                      onTap: () {
+                        // showModalBottomSheet(
+                        //   context: context,
+                        //   builder: (BuildContext context) {
+                        //     return Container(
+                        //       padding: EdgeInsets.all(20),
+                        //       child: Column(
+                        //         mainAxisSize: MainAxisSize.min,
+                        //         children: <Widget>[
+                        //           Icon(
+                        //             Icons.directions_bus,
+                        //             size: 80,
+                        //             color: Colors.grey[400],
+                        //           ),
+                        //           SizedBox(height: 20),
+                        //           Text(
+                        //             'Ahmad Submul',
+                        //             style: TextStyle(
+                        //               fontSize: 22,
+                        //               fontWeight: FontWeight.bold,
+                        //             ),
+                        //           ),
+                        //           SizedBox(height: 10),
+                        //           Text(
+                        //             'ID: ANGKOT215',
+                        //             style: TextStyle(
+                        //               fontSize: 14,
+                        //               color: Colors.grey,
+                        //             ),
+                        //           ),
+                        //           SizedBox(height: 40),
+                        //           FloatingActionButton(
+                        //             onPressed: () {},
+                        //             child: Icon(
+                        //               Icons.waving_hand,
+                        //               size: 30,
+                        //             ),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     );
+                        //   },
+                        // );
+                      },
+                      child: Image.asset("assets/icon/shared-taxi.png"),
+                    )
+                  ),
+                ],
+              ),
             ],
           ),
           GestureDetector(
@@ -223,4 +277,50 @@ class _UserMapLayoutState extends State<UserMapLayout> {
       ),
     );
   }
+
+  Future naikAngkot(){
+    return  showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                Icons.directions_bus,
+                size: 80,
+                color: Colors.grey[400],
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Ahmad Submul',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'ID: ANGKOT215',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 40),
+              FloatingActionButton(
+                onPressed: () {},
+                child: Icon(
+                  Icons.waving_hand,
+                  size: 30,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
+
