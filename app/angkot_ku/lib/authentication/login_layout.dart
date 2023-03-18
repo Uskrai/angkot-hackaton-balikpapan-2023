@@ -162,7 +162,7 @@ class _LoginLayoutState extends State<LoginLayout> {
 
                           widget.onLoggedIn.call();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text("login"),
                             ),
                           );

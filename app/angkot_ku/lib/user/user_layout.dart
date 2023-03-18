@@ -1,4 +1,5 @@
 import 'package:angkot_ku/user/user_angkot_layout.dart';
+import 'package:angkot_ku/user/user_bis_layout.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -36,50 +37,11 @@ class _HomeUserLayoutState extends State<HomeUserLayout>{
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-    Scaffold(
-      body: UserAngkotLayout(),
+    const Scaffold(
+      body: UserBisLayout(),
     ),
-    FlutterMap(
-      options: MapOptions(
-        // center: widget.client.currentUser.location,
-        zoom: 16,
-      ),
-      children: [
-        TileLayer(
-          maxZoom: 19,
-          minZoom: 0,
-          urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          userAgentPackageName: "org.github.uskrai.angkot",
-        ),
-        PolylineLayer(
-          polylineCulling: true,
-          polylines: [
-            // for (var line in widget.route.lines)
-            //   Polyline(
-            //     points: line.points,
-            //     color: Colors.blue,
-            //     strokeWidth: 3,
-            //   ),
-            // Polyline(points: points, color: Colors.red)
-          ],
-        ),
-        // MarkerLayer(
-        //   markers: [
-        //     for (var user in widget.client.users.map(
-        //           (it) => markerFromUser(it),
-        //     ))
-        //       if (user != null) user,
-        //     Marker(
-        //       point: widget.client.currentUser.location,
-        //       builder: (context) {
-        //         return Image.asset("assets/icon/user.png");
-        //       },
-        //       width: 20,
-        //       height: 20,
-        //     ),
-        //   ],
-        // ),
-      ],
+    const Scaffold(
+      body: UserAngkotLayout(),
     )
   ];
 
