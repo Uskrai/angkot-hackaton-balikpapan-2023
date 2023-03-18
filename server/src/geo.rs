@@ -32,6 +32,7 @@ impl From<Location> for geoutils::Location {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct SharedTaxi {
+    email: String,
     location: Location,
 }
 
@@ -48,6 +49,7 @@ impl SharedTaxi {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Customer {
+    email: String,
     location: Location,
 }
 
@@ -68,6 +70,7 @@ impl Customer {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Bus {
+    email: String,
     location: Location,
 }
 
@@ -84,6 +87,13 @@ impl Bus {
 
 #[derive(Serialize, Clone, Debug)]
 pub enum User {
+    Customer(Customer),
+    SharedTaxi(SharedTaxi),
+    Bus(Bus),
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub enum IniitalMessage {
     Customer(Customer),
     SharedTaxi(SharedTaxi),
     Bus(Bus),
@@ -242,14 +252,45 @@ impl RouteState {
     }
 }
 
+#[derive(Deserialize, Clone, Debug)]
+pub struct InitialCustomer {
+    location: Location,
+}
+
+impl From<(crate::user::User, InitialCustomer)> for User {
+    fn from(value: (crate::user::User, InitialCustomer)) -> Self {
+        User::Customer(Customer {
+            email: value.0.email,
+            location: value.1.location,
+        })
+    }
+}
+
 pub async fn customer_shared_taxi(
     PathUuid(name): PathUuid,
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
     State(db): State<DatabaseConnection>,
+    user: crate::user::User,
 ) -> Result<impl IntoResponse, Error> {
     let state = state.get_shared_taxi(&db, name).await?;
-    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<Customer>(state, ws).await }))
+    Ok(ws.on_upgrade(move |ws| async move {
+        handle_websocket::<InitialCustomer>(state, ws, user).await
+    }))
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct InitialSharedTaxi {
+    location: Location,
+}
+
+impl From<(crate::user::User, InitialSharedTaxi)> for User {
+    fn from(value: (crate::user::User, InitialSharedTaxi)) -> Self {
+        User::SharedTaxi(SharedTaxi {
+            email: value.0.email,
+            location: value.1.location,
+        })
+    }
 }
 
 pub async fn shared_taxi(
@@ -257,9 +298,12 @@ pub async fn shared_taxi(
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
     State(db): State<DatabaseConnection>,
+    user: crate::user::User,
 ) -> Result<impl IntoResponse, Error> {
     let state = state.get_shared_taxi(&db, name).await?;
-    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<SharedTaxi>(state, ws).await }))
+    Ok(ws.on_upgrade(move |ws| async move {
+        handle_websocket::<InitialSharedTaxi>(state, ws, user).await
+    }))
 }
 
 pub async fn customer_bus(
@@ -267,9 +311,26 @@ pub async fn customer_bus(
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
     State(db): State<DatabaseConnection>,
+    user: crate::user::User,
 ) -> Result<impl IntoResponse, Error> {
     let state = state.get_bus(&db, name).await?;
-    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<Customer>(state, ws).await }))
+    Ok(ws.on_upgrade(move |ws| async move {
+        handle_websocket::<InitialCustomer>(state, ws, user).await
+    }))
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct InitialBus {
+    location: Location,
+}
+
+impl From<(crate::user::User, InitialBus)> for User {
+    fn from(value: (crate::user::User, InitialBus)) -> Self {
+        User::Bus(Bus {
+            email: value.0.email,
+            location: value.1.location,
+        })
+    }
 }
 
 pub async fn bus(
@@ -277,9 +338,11 @@ pub async fn bus(
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
     State(db): State<DatabaseConnection>,
+    user: crate::user::User,
 ) -> Result<impl IntoResponse, Error> {
     let state = state.get_bus(&db, name).await?;
-    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<Bus>(state, ws).await }))
+    Ok(ws
+        .on_upgrade(move |ws| async move { handle_websocket::<InitialBus>(state, ws, user).await }))
 }
 
 #[derive(Debug)]
@@ -457,9 +520,10 @@ impl UserState {
     }
 }
 
-async fn handle_websocket<U>(state: RouteState, ws: WebSocket)
+async fn handle_websocket<U>(state: RouteState, ws: WebSocket, user_model: crate::user::User)
 where
-    U: Into<User> + DeserializeOwned,
+    U: DeserializeOwned,
+    (crate::user::User, U): Into<User>,
 {
     let current_id = state.insert_user(None);
     tracing::debug!("new user {current_id}");
@@ -532,7 +596,7 @@ where
                                             continue;
                                         }
 
-                                        let user = request.into();
+                                        let user = (user_model.clone(), request).into();
                                         *it = Some(user);
                                         drop(it);
                                     }

@@ -12,7 +12,7 @@ use crate::{
     session::Session,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
     pub id: Uuid,
     pub email: String,
