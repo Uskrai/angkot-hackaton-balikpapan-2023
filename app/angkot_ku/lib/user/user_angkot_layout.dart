@@ -2,8 +2,10 @@ import 'package:angkot_ku/routes/route_layout.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../client/ApiClient.dart';
+import '../maps.dart';
 import '../temp/route.dart';
 
 class UserAngkotLayout extends StatefulWidget {
@@ -31,7 +33,7 @@ class _UserAngkotLayoutState extends State<UserAngkotLayout> {
         children: [
           FlutterMap(
             options: MapOptions(
-              // center: widget.client.currentUser.location,
+              center: LatLng(-0.42317170805325727, 116.98292392032356),
               zoom: 16,
             ),
             children: [
@@ -40,6 +42,29 @@ class _UserAngkotLayoutState extends State<UserAngkotLayout> {
                 minZoom: 0,
                 urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 userAgentPackageName: "org.github.uskrai.angkot",
+              ),
+              PolylineLayer(
+                polylineCulling: true,
+                polylines: [
+                    Polyline(
+                      points: [LatLng(-0.42317170805325727, 116.98292392032356)],
+                      color: Colors.blue,
+                      strokeWidth: 3,
+                    ),
+                  // Polyline(points: points, color: Colors.red)
+                ],
+              ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: LatLng(-0.42317170805325727, 116.98292392032356),
+                    builder: (context) {
+                      return Image.asset('assets/images/icon.png');
+                    },
+                    width: 100,
+                    height: 100,
+                  ),
+                ],
               ),
             ],
           ),
