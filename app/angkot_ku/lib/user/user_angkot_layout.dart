@@ -1,3 +1,4 @@
+import 'package:angkot_ku/routes/route_layout.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -10,6 +11,9 @@ class UserAngkotLayout extends StatefulWidget {
 }
 
 class _UserAngkotLayoutState extends State<UserAngkotLayout> {
+
+  String _route = "Pilih Jalan..";
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -32,7 +36,8 @@ class _UserAngkotLayoutState extends State<UserAngkotLayout> {
           ),
           GestureDetector(
             onTap: (){
-
+              Navigator.push(context, MaterialPageRoute(builder: (context) => RouteLayout(route: _route)
+              ));
             },
             child: Container(
               height: size.height * 0.07,
@@ -62,9 +67,9 @@ class _UserAngkotLayoutState extends State<UserAngkotLayout> {
                         },
                         icon: const Icon(Icons.route)
                     ),
-                    const Text(
-                      "Pilih Rute..",
-                      style: TextStyle(
+                    Text(
+                      _route,
+                      style: const TextStyle(
                         color: CupertinoColors.systemGrey2
                       ),
                     ),
