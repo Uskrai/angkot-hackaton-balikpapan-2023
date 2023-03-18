@@ -110,3 +110,12 @@ pub async fn delete(
 
     Ok(())
 }
+
+pub async fn exists(db: &DatabaseConnection, id: Uuid, r#type: VehicleType) -> Result<bool, Error> {
+    crate::entity::route::Entity::find_by_id(id)
+        .filter(crate::entity::route::Column::VehicleType.eq(r#type.into_model()))
+        .count(db)
+        .await
+        .map(|it| it != 0)
+        .map_err(Into::into)
+}

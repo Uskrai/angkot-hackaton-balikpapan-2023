@@ -1,16 +1,22 @@
-use axum::extract::{ws::WebSocket, Path, State};
+use axum::extract::{ws::WebSocket, State};
 use futures::stream::SplitSink;
 use futures::{SinkExt, StreamExt};
 use parking_lot::Mutex;
+use sea_orm::DatabaseConnection;
 use serde::de::DeserializeOwned;
 use std::collections::HashSet;
 use std::ops::Deref;
 use std::sync::atomic::AtomicUsize;
 use std::{collections::HashMap, sync::Arc};
+use uuid::Uuid;
 
 use axum::{extract::ws::Message as WSMessage, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::Sender;
+
+use crate::api::v1::route::VehicleType;
+use crate::error::Error;
+use crate::PathUuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Location {
@@ -153,7 +159,7 @@ impl Default for Inner {
 }
 
 #[derive(Clone, Default)]
-struct RouteState(Arc<Inner>);
+pub struct RouteState(Arc<Inner>);
 
 impl Deref for RouteState {
     type Target = Arc<Inner>;
@@ -165,12 +171,49 @@ impl Deref for RouteState {
 
 #[derive(Default)]
 pub struct GeoStateInner {
-    shared_taxi: Mutex<HashMap<String, RouteState>>,
-    bus: Mutex<HashMap<String, RouteState>>,
+    shared_taxi: Mutex<HashMap<Uuid, RouteState>>,
+    bus: Mutex<HashMap<Uuid, RouteState>>,
 }
 
 #[derive(Default, Clone)]
 pub struct GeoState(Arc<GeoStateInner>);
+
+impl GeoState {
+    async fn get(
+        item: &Mutex<HashMap<Uuid, RouteState>>,
+        db: &DatabaseConnection,
+        id: Uuid,
+        r#type: VehicleType,
+    ) -> Result<RouteState, Error> {
+        let state = item.lock().get(&id).cloned();
+
+        if let Some(it) = state {
+            return Ok(it);
+        }
+
+        if !super::api::v1::route::exists(db, id, r#type).await? {
+            return Err(Error::NoResource);
+        }
+
+        Ok(item.lock().entry(id).or_default().clone())
+    }
+
+    pub async fn get_shared_taxi(
+        &self,
+        db: &DatabaseConnection,
+        id: Uuid,
+    ) -> Result<RouteState, crate::error::Error> {
+        Self::get(&self.0.shared_taxi, db, id, VehicleType::SharedTaxi).await
+    }
+
+    pub async fn get_bus(
+        &self,
+        db: &DatabaseConnection,
+        id: Uuid,
+    ) -> Result<RouteState, crate::error::Error> {
+        Self::get(&self.0.bus, db, id, VehicleType::Bus).await
+    }
+}
 
 impl RouteState {
     pub fn insert_user(&self, user: Option<User>) -> String {
@@ -191,39 +234,43 @@ impl RouteState {
 }
 
 pub async fn customer_shared_taxi(
-    Path(name): Path<String>,
+    PathUuid(name): PathUuid,
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
-) -> impl IntoResponse {
-    let state = state.0.shared_taxi.lock().entry(name).or_default().clone();
-    ws.on_upgrade(move |ws| async move { handle_websocket::<Customer>(state, ws).await })
+    State(db): State<DatabaseConnection>,
+) -> Result<impl IntoResponse, Error> {
+    let state = state.get_shared_taxi(&db, name).await?;
+    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<Customer>(state, ws).await }))
 }
 
 pub async fn shared_taxi(
-    Path(name): Path<String>,
+    PathUuid(name): PathUuid,
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
-) -> impl IntoResponse {
-    let state = state.0.shared_taxi.lock().entry(name).or_default().clone();
-    ws.on_upgrade(move |ws| async move { handle_websocket::<SharedTaxi>(state, ws).await })
+    State(db): State<DatabaseConnection>,
+) -> Result<impl IntoResponse, Error> {
+    let state = state.get_shared_taxi(&db, name).await?;
+    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<SharedTaxi>(state, ws).await }))
 }
 
 pub async fn customer_bus(
-    Path(name): Path<String>,
+    PathUuid(name): PathUuid,
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
-) -> impl IntoResponse {
-    let state = state.0.bus.lock().entry(name).or_default().clone();
-    ws.on_upgrade(move |ws| async move { handle_websocket::<Customer>(state, ws).await })
+    State(db): State<DatabaseConnection>,
+) -> Result<impl IntoResponse, Error> {
+    let state = state.get_bus(&db, name).await?;
+    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<Customer>(state, ws).await }))
 }
 
 pub async fn bus(
-    Path(name): Path<String>,
+    PathUuid(name): PathUuid,
     ws: axum::extract::ws::WebSocketUpgrade,
     State(state): State<GeoState>,
-) -> impl IntoResponse {
-    let state = state.0.bus.lock().entry(name).or_default().clone();
-    ws.on_upgrade(move |ws| async move { handle_websocket::<Bus>(state, ws).await })
+    State(db): State<DatabaseConnection>,
+) -> Result<impl IntoResponse, Error> {
+    let state = state.get_bus(&db, name).await?;
+    Ok(ws.on_upgrade(move |ws| async move { handle_websocket::<Bus>(state, ws).await }))
 }
 
 #[derive(Debug)]
