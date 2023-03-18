@@ -1,0 +1,4 @@
+enum VehicleType {
+  Bus,
+  SharedTaxi
+}
