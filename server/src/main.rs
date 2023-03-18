@@ -31,8 +31,22 @@ async fn main() {
 
     migration::Migrator::up(&db, None).await.unwrap();
 
+    let apiv1 = Router::new()
+        .nest(
+            "/auth",
+            Router::new()
+                .route("/login", axum::routing::post(api::v1::auth::login))
+                .route("/register", axum::routing::post(api::v1::auth::register))
+                .route("/profile", axum::routing::get(api::v1::auth::profile))
+                .route(
+                    "/changepassword",
+                    axum::routing::post(api::v1::auth::change_password),
+                ),
+        );
 
     let app = Router::new()
+        .nest("/api/v1", apiv1)
+        .layer(Extension(db))
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
