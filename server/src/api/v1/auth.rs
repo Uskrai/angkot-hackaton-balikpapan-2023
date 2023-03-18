@@ -167,3 +167,49 @@ pub async fn register(
     }))
 }
 
+#[derive(Debug, Serialize, Deserialize, Validate, Clone)]
+pub struct ChangePasswordRequest {
+    old_password: String,
+    new_password: String,
+}
+
+pub async fn change_password(
+    Extension(db): Extension<DatabaseConnection>,
+    user: crate::entity::user::Model,
+    Json(request): Json<ChangePasswordRequest>,
+) -> Result<JsonSuccess<()>, Error> {
+    if !verify_password(&request.old_password, &user.password) {
+        return Err(Error::Unauthorized(UnauthorizedType::WrongPassword));
+    }
+
+    let model = user::ActiveModel {
+        id: ActiveValue::Set(user.id),
+        password: ActiveValue::Set(hash_password(&request.new_password)?),
+        ..Default::default()
+    };
+    user::Entity::update(model).exec(&db).await?;
+
+    Ok(JsonSuccess(()))
+}
+
+fn verify_password(password: &str, hashed: &str) -> bool {
+    let argon = Argon2::default();
+
+    let hashed = match PasswordHash::new(hashed) {
+        Ok(hashed) => hashed,
+        Err(_) => return false,
+    };
+
+    argon.verify_password(password.as_bytes(), &hashed).is_ok()
+}
+
+fn hash_password(password: &str) -> Result<String, Error> {
+    let argon = Argon2::default();
+    let salt = SaltString::generate(&mut OsRng);
+
+    argon
+        .hash_password(password.as_bytes(), &salt)
+        .map(|it| it.to_string())
+        .map_err(Into::into)
+}
+
