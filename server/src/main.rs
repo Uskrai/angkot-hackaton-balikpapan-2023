@@ -1,19 +1,23 @@
 use std::net::SocketAddr;
 
-use axum::{extract::FromRef, Extension, Router};
+use axum::{extract::FromRef, Router};
 use migration::MigratorTrait;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use crate::geo::GeoState;
+
 mod api;
 mod entity;
 mod error;
+mod geo;
 mod session;
 mod user;
 
 #[derive(FromRef, Clone)]
 pub struct AppState {
     connection: DatabaseConnection,
+    geo: GeoState,
 }
 
 #[tokio::main]
@@ -36,8 +40,11 @@ async fn main() {
 
     migration::Migrator::up(&db, None).await.unwrap();
 
-    let state = AppState { connection: db };
-
+    let geo = GeoState::default();
+    let state = AppState {
+        connection: db,
+        geo,
+    };
 
     let apiv1 = Router::new()
         .nest(
@@ -57,6 +64,13 @@ async fn main() {
         );
 
     let app = Router::new()
+        .route("/shared-taxi/:name", axum::routing::get(geo::shared_taxi))
+        .route("/bus/:name", axum::routing::get(geo::bus))
+        .route(
+            "/customer/shared-taxi/:name",
+            axum::routing::get(geo::customer_shared_taxi),
+        )
+        .route("/customer/bus/:name", axum::routing::get(geo::customer_bus))
         .nest("/api/v1", apiv1)
         .with_state(state)
         .layer(tower_http::trace::TraceLayer::new_for_http());
