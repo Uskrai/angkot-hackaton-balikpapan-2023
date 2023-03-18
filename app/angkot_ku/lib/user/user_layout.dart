@@ -45,8 +45,6 @@ class HomeUserLayout extends StatefulWidget {
 class _HomeUserLayoutState extends State<HomeUserLayout>{
   int _selectedIndex = 0;
 
-  PersistentBottomSheetController? _bottomSheetController;
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
