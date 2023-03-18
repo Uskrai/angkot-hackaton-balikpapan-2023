@@ -66,6 +66,7 @@ async fn main() {
         .route("/customer/bus/:name", axum::routing::get(geo::customer_bus))
         .nest("/api/v1", apiv1)
         .with_state(state)
+        .layer(tower_http::cors::CorsLayer::very_permissive())
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
