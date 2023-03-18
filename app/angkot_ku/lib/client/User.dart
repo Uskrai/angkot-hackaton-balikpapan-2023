@@ -5,7 +5,7 @@ enum DriverType { bus, sharedTaxi }
 abstract class User {
   const User();
 
-  get location;
+  LatLng get location;
 
   User copyWith({
     LatLng? location,
