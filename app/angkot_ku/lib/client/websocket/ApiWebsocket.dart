@@ -18,6 +18,8 @@ abstract class ApiWebsocketClient {
   Stream get changed;
   List<User> get users;
 
+  Iterable<MapEntry<String, User>> get usersEntries;
+
   User get currentUser;
 
   void connect();
@@ -48,6 +50,15 @@ abstract class GenericWebsocketClient extends ApiWebsocketClient {
   }
 }
 
+class ResponsePickupFromUser {
+  ResponsePickupFromUser(
+      {required this.user, required this.id, required this.accept});
+
+  User user;
+  String id;
+  bool accept;
+}
+
 class CustomerWebsocketClient extends GenericWebsocketClient {
   CustomerWebsocketClient(
     this.url,
@@ -68,11 +79,18 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
   final DriverType driver;
 
   @override
+  Iterable<MapEntry<String, User>> get usersEntries => _users.entries;
+
+  @override
   Stream get changed => _changedController.stream;
 
   @override
   List<User> get users => _users.values.toList();
   final HashMap<String, User> _users = HashMap();
+
+  final _notifyController = StreamController<ResponsePickupFromUser>();
+
+  Stream get notify => _notifyController.stream;
 
   @override
   User get currentUser => customer;
@@ -81,6 +99,12 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
   String url;
   LineRoute route;
   Customer customer;
+
+  void _notifyChange() {
+    if (!isClosed()) {
+      _changedController.add(null);
+    }
+  }
 
   @override
   void connect() {
@@ -117,8 +141,12 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
       (event) {
         var json = jsonDecode(event);
 
-        if (handleReceive(json, _users)) {
-          _changedController.add(null);
+        if (handleReceiveDefault(json, _users)) {
+          _notifyChange();
+        }
+
+        if (handleReceive(json)) {
+          return;
         }
 
         var initial = decodeInitialMessage(json);
@@ -129,6 +157,42 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
     );
 
     _wsChannel = channel;
+  }
+
+  bool handleReceive(dynamic json) {
+    if (json['PickupResponse']) {
+      var type = json["PickupResponse"];
+      bool accept = type["accept"];
+      String id = type["id"];
+
+      var user = _users[id];
+
+      if (user != null) {
+        _notifyController.add(ResponsePickupFromUser(
+          user: user,
+          id: id,
+          accept: accept,
+        ));
+      }
+    }
+
+    return false;
+  }
+
+  void requestPickup(String id) {
+    _wsChannel?.sink.add(
+      jsonEncode(
+        {
+          "PickupRequest": {
+            "id": id,
+          }
+        },
+      ),
+    );
+  }
+
+  void responsePickup(String id, bool accept) {
+    //
   }
 
   @override
@@ -153,7 +217,22 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
   }
 }
 
-class SharedTaxiWebsocketClient extends GenericWebsocketClient {
+abstract class DriverWebsocketClient extends GenericWebsocketClient {
+  Stream<UserWithId> get notify;
+
+  bool handleReceive(dynamic json) {
+    if (json['PickupRequest'] != null) {
+      return handlePickupRequest(json['PickupRequest']['id']);
+    }
+
+    return false;
+  }
+
+  bool handlePickupRequest(String id);
+  void responsePickup(String id, bool accept);
+}
+
+class SharedTaxiWebsocketClient extends DriverWebsocketClient {
   SharedTaxiWebsocketClient(
     this.url,
     this.authorization,
@@ -174,12 +253,20 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
   final String url;
   final LineRoute route;
 
+  final _notifyController = StreamController<UserWithId>();
+
+  @override
+  Stream<UserWithId> get notify => _notifyController.stream;
+
   @override
   User get currentUser => sharedTaxi;
   SharedTaxi sharedTaxi;
 
   @override
   List<User> get users => _users.values.toList();
+
+  @override
+  Iterable<MapEntry<String, User>> get usersEntries => _users.entries;
   final HashMap<String, User> _users = HashMap();
 
   void _notifyChange() {
@@ -215,8 +302,13 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
     channel.stream.listen((event) {
       var json = jsonDecode(event);
 
-      if (handleReceive(json, _users)) {
+      if (handleReceiveDefault(json, _users)) {
         _notifyChange();
+        return;
+      }
+
+      if (super.handleReceive(json)) {
+        return;
       }
 
       var initial = decodeInitialMessage(json);
@@ -235,6 +327,28 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
   }
 
   @override
+  bool handlePickupRequest(String id) {
+    var it = _users[id];
+
+    if (it != null) {
+      _notifyController.add(UserWithId(user: it, id: id));
+    }
+
+    return false;
+  }
+
+  @override
+  void responsePickup(String id, bool accept) {
+    _wsChannel?.sink.add(
+      jsonEncode(
+        {
+          "PickupResponse": {"id": id, "accept": accept},
+        },
+      ),
+    );
+  }
+
+  @override
   void close() {
     _changedController.close();
     _wsChannel?.sink.close();
@@ -246,7 +360,7 @@ class SharedTaxiWebsocketClient extends GenericWebsocketClient {
   }
 }
 
-class BusWebsocketClient extends GenericWebsocketClient {
+class BusWebsocketClient extends DriverWebsocketClient {
   BusWebsocketClient(this.url, this.authorization, this.route, this.bus);
   final _changedController = StreamController();
   @override
@@ -254,6 +368,10 @@ class BusWebsocketClient extends GenericWebsocketClient {
 
   @override
   String get routeName => "bus";
+
+  final _notifyController = StreamController<UserWithId>();
+  @override
+  Stream<UserWithId> get notify => _notifyController.stream;
 
   @override
   IOWebSocketChannel? _wsChannel;
@@ -269,7 +387,15 @@ class BusWebsocketClient extends GenericWebsocketClient {
 
   @override
   List<User> get users => _users.values.toList();
+  @override
+  Iterable<MapEntry<String, User>> get usersEntries => _users.entries;
   final HashMap<String, User> _users = HashMap();
+
+  void _notifyChange() {
+    if (!isClosed()) {
+      _changedController.add(null);
+    }
+  }
 
   @override
   void connect() {
@@ -299,8 +425,13 @@ class BusWebsocketClient extends GenericWebsocketClient {
     channel.stream.listen((event) {
       var json = jsonDecode(event);
 
-      if (handleReceive(json, _users)) {
-        _changedController.add(null);
+      if (handleReceiveDefault(json, _users)) {
+        _notifyChange();
+        return;
+      }
+
+      if (super.handleReceive(json)) {
+        return;
       }
 
       var initial = decodeInitialMessage(json);
@@ -316,6 +447,28 @@ class BusWebsocketClient extends GenericWebsocketClient {
       location: location,
     );
     super.changeLocation(location);
+  }
+
+  @override
+  bool handlePickupRequest(String id) {
+    var it = _users[id];
+
+    if (it != null) {
+      _notifyController.add(UserWithId(user: it, id: id));
+    }
+
+    return false;
+  }
+
+  @override
+  void responsePickup(String id, bool accept) {
+    _wsChannel?.sink.add(
+      jsonEncode(
+        {
+          "PickupResponse": {"id": id, "accept": accept},
+        },
+      ),
+    );
   }
 
   @override
@@ -340,7 +493,7 @@ InitialMessage? decodeInitialMessage(dynamic json) {
   return null;
 }
 
-bool handleReceive(dynamic json, HashMap<String, User> users) {
+bool handleReceiveDefault(dynamic json, HashMap<String, User> users) {
   var isHandled = true;
   if (json["NewUser"] != null) {
     var newUser = json["NewUser"];

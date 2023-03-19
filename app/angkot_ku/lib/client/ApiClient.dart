@@ -165,7 +165,7 @@ class ApiClient {
     _authenticationController.add(null);
   }
 
-  ApiWebsocketClient createCustomer(
+  CustomerWebsocketClient createCustomer(
     LineRoute route,
     InitialCustomer customer,
     DriverType driver,
@@ -179,7 +179,7 @@ class ApiClient {
     );
   }
 
-  ApiWebsocketClient createSharedTaxi(
+  SharedTaxiWebsocketClient createSharedTaxi(
     LineRoute route,
     InitialSharedTaxi sharedTaxi,
   ) {
@@ -191,7 +191,7 @@ class ApiClient {
     );
   }
 
-  ApiWebsocketClient createBus(
+  BusWebsocketClient createBus(
     LineRoute route,
     InitialBus bus,
   ) {

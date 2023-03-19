@@ -76,7 +76,7 @@ class HomeUserInnerWidget extends StatefulWidget {
 class _HomeUserInnerWidgetState extends State<HomeUserInnerWidget> {
   int _selectedIndex = 0;
   int _count = 0;
-  ApiWebsocketClient? _api;
+  CustomerWebsocketClient? _api;
   LineRoute? _route;
 
   final driverType = {

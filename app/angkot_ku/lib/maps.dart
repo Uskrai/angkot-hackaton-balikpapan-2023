@@ -1,3 +1,4 @@
+import 'package:angkot_ku/client/Role.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -75,7 +76,7 @@ Future<LatLng> getCurrentLatLng() async {
 //   );
 // }
 
-Marker? markerFromUser(User user) {
+Marker? markerFromUser({required User user, Function? onTap}) {
   if (user is Customer) {
     return Marker(
       point: user.location,
@@ -92,50 +93,7 @@ Marker? markerFromUser(User user) {
       height: 20,
       builder: (context) => GestureDetector(
         onTap: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return Container(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Icon(
-                      Icons.directions_bus,
-                      size: 80,
-                      color: Colors.grey[400],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Ahmad Submul',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'ID: ANGKOT215',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    FloatingActionButton(
-                      onPressed: () {
-
-                      },
-                      child: const Icon(
-                        Icons.waving_hand,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
+          onTap?.call();
         },
         child: Image.asset("assets/icon/shared-taxi.png"),
       ),
@@ -145,9 +103,12 @@ Marker? markerFromUser(User user) {
       point: user.location,
       width: 20,
       height: 20,
-      builder: (context) {
-        return Image.asset("assets/icon/bus.png");
-      },
+      builder: (context) => GestureDetector(
+        onTap: () {
+          onTap?.call();
+        },
+        child: Image.asset("assets/icon/bus.png"),
+      ),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:angkot_ku/client/User.dart';
 import 'package:angkot_ku/client/websocket/ApiWebsocket.dart';
 import 'package:angkot_ku/maps.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,7 +28,7 @@ class DriverMapLayout extends StatefulWidget {
   final ApiClient apiClient;
   final LatLng center;
   final Function(LineRoute) onPressRoute;
-  final ApiWebsocketClient? websocket;
+  final DriverWebsocketClient? websocket;
   final LineRoute? currentRoute;
 
   @override
@@ -73,6 +74,10 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
     }
     websocket.changed.listen((_) {
       setState(() {});
+    });
+
+    websocket.notify.listen((user) {
+      notifyDriver(user);
     });
 
     (() async {
@@ -145,7 +150,12 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
                 markers: [
                   if (websocket != null)
                     for (var user in websocket.users.map(
-                      (it) => markerFromUser(it),
+                      (it) => markerFromUser(
+                        user: it,
+                        onTap: () {
+                          //
+                        },
+                      ),
                     ))
                       if (user != null) user,
                   Marker(
@@ -163,54 +173,55 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
               MarkerLayer(
                 markers: [
                   Marker(
-                      point: LatLng(-1.278407, 116.822300),
-                      builder: (context) => GestureDetector(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Container(
-                                    padding: EdgeInsets.all(20),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Icon(
-                                          Icons.directions_bus,
-                                          size: 80,
-                                          color: Colors.grey[400],
-                                        ),
-                                        SizedBox(height: 20),
-                                        Text(
-                                          'Ahmad Submul',
-                                          style: TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                        Text(
-                                          'ID: ANGKOT215',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        SizedBox(height: 40),
-                                        FloatingActionButton(
-                                          onPressed: () {},
-                                          child: Icon(
-                                            Icons.waving_hand,
-                                            size: 30,
-                                          ),
-                                        ),
-                                      ],
+                    point: LatLng(-1.278407, 116.822300),
+                    builder: (context) => GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.directions_bus,
+                                    size: 80,
+                                    color: Colors.grey[400],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  const Text(
+                                    'Ahmad Submul',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  );
-                                },
-                              );
-                            },
-                            child: Image.asset("assets/icon/shared-taxi.png"),
-                          )),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    'ID: ANGKOT215',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 40),
+                                  FloatingActionButton(
+                                    onPressed: () {},
+                                    child: const Icon(
+                                      Icons.waving_hand,
+                                      size: 30,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      child: Image.asset("assets/icon/shared-taxi.png"),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -286,7 +297,7 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text(
+              const Text(
                 'Kursi Angkot',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -295,7 +306,7 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
+                children: const [
                   Icon(Icons.check_circle, color: Colors.green),
                   Icon(Icons.check_circle, color: Colors.green),
                   Icon(Icons.check_circle, color: Colors.green),
@@ -305,7 +316,7 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
                   Icon(Icons.cancel, color: Colors.red),
                 ],
               ),
-              Text(
+              const Text(
                 '5 dari 7 kursi telah diduduki',
                 style: TextStyle(
                   fontSize: 18,
@@ -318,12 +329,12 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
     );
   }
 
-  Future notifyDriver() {
+  Future notifyDriver(UserWithId user) {
     return showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
@@ -333,9 +344,10 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTile(
-                title: Text('Orderan Masuk'),
-                subtitle: Text(
-                    'Apakah Anda ingin menerima atau menolak orderan ini?'),
+                title: Text('Orderan Masuk dari ${user.user.email}'),
+                subtitle: const Text(
+                  'Apakah Anda ingin menerima atau menolak orderan ini?',
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -347,17 +359,17 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colors.blue, width: 2),
+                        side: const BorderSide(color: Colors.blue, width: 2),
                       ),
                     ),
-                    child: Text('Tombol dengan border'),
+                    child: const Text('Tombol dengan border'),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       // Kode yang akan dijalankan saat tombol "Tolak" diklik
                       Navigator.pop(context);
                     },
-                    child: Text('Tolak'),
+                    child: const Text('Tolak'),
                   ),
                 ],
               ),

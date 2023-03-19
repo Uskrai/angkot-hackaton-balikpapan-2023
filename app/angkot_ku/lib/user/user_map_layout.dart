@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../client/ApiClient.dart';
+import '../client/User.dart';
 import '../routes/route_layout.dart';
 import '../temp/route.dart';
 
@@ -27,7 +28,7 @@ class UserMapLayout extends StatefulWidget {
   final ApiClient apiClient;
   final LatLng center;
   final Function(LineRoute) onPressRoute;
-  final ApiWebsocketClient? websocket;
+  final CustomerWebsocketClient? websocket;
   final LineRoute? currentRoute;
 
   @override
@@ -74,6 +75,10 @@ class _UserMapLayoutState extends State<UserMapLayout> {
     }
     websocket.changed.listen((_) {
       setState(() {});
+    });
+
+    websocket.notify.listen((response) {
+      //
     });
 
     (() async {
@@ -145,9 +150,63 @@ class _UserMapLayoutState extends State<UserMapLayout> {
               MarkerLayer(
                 markers: [
                   if (websocket != null)
-                    for (var user in websocket.users.map(
-                      (it) => markerFromUser(it),
-                    ))
+                    for (var user in websocket.usersEntries.map((entry) {
+                      var it = entry.value;
+                      return markerFromUser(
+                        user: it,
+                        onTap: () {
+                          if (it is Customer) {
+                            return null;
+                          }
+
+                          return showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Container(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.directions_bus,
+                                      size: 80,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Text(
+                                      it.email,
+                                      style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    // const Text(
+                                    //   'ID: ANGKOT215',
+                                    //   style: TextStyle(
+                                    //     fontSize: 14,
+                                    //     color: Colors.grey,
+                                    //   ),
+                                    // ),
+                                    // const SizedBox(height: 40),
+                                    FloatingActionButton(
+                                      onPressed: () {
+                                        widget.websocket
+                                            ?.requestPickup(entry.key);
+                                      },
+                                      child: const Icon(
+                                        Icons.waving_hand,
+                                        size: 30,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }))
                       if (user != null) user,
                   Marker(
                     point: websocket != null
@@ -164,55 +223,54 @@ class _UserMapLayoutState extends State<UserMapLayout> {
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: LatLng(-1.278407, 116.822300),
-                    builder: (context) => GestureDetector(
-                      onTap: () {
-                        // showModalBottomSheet(
-                        //   context: context,
-                        //   builder: (BuildContext context) {
-                        //     return Container(
-                        //       padding: EdgeInsets.all(20),
-                        //       child: Column(
-                        //         mainAxisSize: MainAxisSize.min,
-                        //         children: <Widget>[
-                        //           Icon(
-                        //             Icons.directions_bus,
-                        //             size: 80,
-                        //             color: Colors.grey[400],
-                        //           ),
-                        //           SizedBox(height: 20),
-                        //           Text(
-                        //             'Ahmad Submul',
-                        //             style: TextStyle(
-                        //               fontSize: 22,
-                        //               fontWeight: FontWeight.bold,
-                        //             ),
-                        //           ),
-                        //           SizedBox(height: 10),
-                        //           Text(
-                        //             'ID: ANGKOT215',
-                        //             style: TextStyle(
-                        //               fontSize: 14,
-                        //               color: Colors.grey,
-                        //             ),
-                        //           ),
-                        //           SizedBox(height: 40),
-                        //           FloatingActionButton(
-                        //             onPressed: () {},
-                        //             child: Icon(
-                        //               Icons.waving_hand,
-                        //               size: 30,
-                        //             ),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //     );
-                        //   },
-                        // );
-                      },
-                      child: Image.asset("assets/icon/shared-taxi.png"),
-                    )
-                  ),
+                      point: LatLng(-1.278407, 116.822300),
+                      builder: (context) => GestureDetector(
+                            onTap: () {
+                              // showModalBottomSheet(
+                              //   context: context,
+                              //   builder: (BuildContext context) {
+                              //     return Container(
+                              //       padding: EdgeInsets.all(20),
+                              //       child: Column(
+                              //         mainAxisSize: MainAxisSize.min,
+                              //         children: <Widget>[
+                              //           Icon(
+                              //             Icons.directions_bus,
+                              //             size: 80,
+                              //             color: Colors.grey[400],
+                              //           ),
+                              //           SizedBox(height: 20),
+                              //           Text(
+                              //             'Ahmad Submul',
+                              //             style: TextStyle(
+                              //               fontSize: 22,
+                              //               fontWeight: FontWeight.bold,
+                              //             ),
+                              //           ),
+                              //           SizedBox(height: 10),
+                              //           Text(
+                              //             'ID: ANGKOT215',
+                              //             style: TextStyle(
+                              //               fontSize: 14,
+                              //               color: Colors.grey,
+                              //             ),
+                              //           ),
+                              //           SizedBox(height: 40),
+                              //           FloatingActionButton(
+                              //             onPressed: () {},
+                              //             child: Icon(
+                              //               Icons.waving_hand,
+                              //               size: 30,
+                              //             ),
+                              //           ),
+                              //         ],
+                              //       ),
+                              //     );
+                              //   },
+                              // );
+                            },
+                            child: Image.asset("assets/icon/shared-taxi.png"),
+                          )),
                 ],
               ),
             ],
@@ -278,49 +336,48 @@ class _UserMapLayoutState extends State<UserMapLayout> {
     );
   }
 
-  Future naikAngkot(){
-    return  showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(
-                Icons.directions_bus,
-                size: 80,
-                color: Colors.grey[400],
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Ahmad Submul',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+  Future naikAngkot(ResponsePickupFromUser response) {
+    if (response.accept) {
+      return showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(
+                  Icons.directions_bus,
+                  size: 80,
+                  color: Colors.grey[400],
                 ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'ID: ANGKOT215',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
+                const SizedBox(height: 20),
+                Text(
+                  response.user.email,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(height: 40),
-              FloatingActionButton(
-                onPressed: () {},
-                child: Icon(
-                  Icons.waving_hand,
-                  size: 30,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+                // const SizedBox(height: 10),
+                // const Text(
+                //   'ID: ANGKOT215',
+                //   style: TextStyle(
+                //     fontSize: 14,
+                //     color: Colors.grey,
+                //   ),
+                // ),
+                const SizedBox(height: 40),
+                const Text("Naik Angkot"),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      Navigator.pop(context);
+
+      return (() async {})();
+    }
   }
 }
-

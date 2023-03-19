@@ -20,7 +20,7 @@ class AngkotHomeLayout extends StatefulWidget {
 
   final List<LineRoute> routes;
   final ApiClient apiClient;
-  final Function(LineRoute, LatLng) createWebsocketClient;
+  final DriverWebsocketClient Function(LineRoute, LatLng) createWebsocketClient;
 
   @override
   State<StatefulWidget> createState() => _AngkotHomeLayoutState();
@@ -31,7 +31,7 @@ class _AngkotHomeLayoutState extends State<AngkotHomeLayout> {
   final _route = "Pilih Jalan...";
 
   LineRoute? currentRoute;
-  ApiWebsocketClient? _api;
+  DriverWebsocketClient? _api;
   int _count = 0;
 
   void _onItemTapped(int index) {

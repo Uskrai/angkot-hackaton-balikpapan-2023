@@ -14,6 +14,13 @@ abstract class User {
   });
 }
 
+class UserWithId {
+  UserWithId({required this.user, required this.id});
+
+  final User user;
+  final String id;
+}
+
 class Customer extends User {
   Customer({required this.email, required this.location});
 
