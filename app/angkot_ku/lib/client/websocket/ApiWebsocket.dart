@@ -336,13 +336,9 @@ class SharedTaxiWebsocketClient extends DriverWebsocketClient {
 
   @override
   void responsePickup(String id, bool accept) {
-    _wsChannel?.sink.add(
-      jsonEncode(
-        {
-          "PickupResponse": {"id": id, "accept": accept},
-        },
-      ),
-    );
+    _wsChannel?.sink.add(jsonEncode({
+      "PickupResponse": {"id": id, "accept": accept}
+    }));
   }
 
   @override
