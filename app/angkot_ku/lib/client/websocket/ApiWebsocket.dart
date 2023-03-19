@@ -160,7 +160,7 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
   }
 
   bool handleReceive(dynamic json) {
-    if (json['PickupResponse']) {
+    if (json['PickupResponse'] != null) {
       var type = json["PickupResponse"];
       bool accept = type["accept"];
       String id = type["id"];

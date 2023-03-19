@@ -354,7 +354,8 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
                 children: <Widget>[
                   OutlinedButton(
                     onPressed: () {
-                      // Disini Fatur
+                      widget.websocket?.responsePickup(user.id, false);
+                      Navigator.pop(context);
                     },
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -362,14 +363,14 @@ class _DriverMapLayoutState extends State<DriverMapLayout> {
                         side: const BorderSide(color: Colors.blue, width: 2),
                       ),
                     ),
-                    child: const Text('Tombol dengan border'),
+                    child: const Text('Tolak'),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // Kode yang akan dijalankan saat tombol "Tolak" diklik
+                      widget.websocket?.responsePickup(user.id, true);
                       Navigator.pop(context);
                     },
-                    child: const Text('Tolak'),
+                    child: const Text('Terima'),
                   ),
                 ],
               ),
