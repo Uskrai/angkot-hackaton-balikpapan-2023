@@ -19,6 +19,7 @@ class _LoginLayoutState extends State<LoginLayout> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _isLoading = false;
+  bool _isObscure = true;
 
   @override
   Widget build(BuildContext context) {
@@ -119,9 +120,22 @@ class _LoginLayoutState extends State<LoginLayout> {
                   ),
                   Container(
                     margin: const EdgeInsets.all(16),
-                    child: TextField(
+                    child: TextFormField(
+                      obscureText: true,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
+                        suffix: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isObscure = !_isObscure;
+                            });
+                          },
+
+                          child: Icon(
+                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                        ),
                         labelText: 'Kata Sandi',
                         labelStyle: const TextStyle(
                           color: Color.fromRGBO(26, 37, 42, 1),
