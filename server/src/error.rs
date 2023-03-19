@@ -113,6 +113,7 @@ impl From<axum::extract::rejection::PathRejection> for Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
+        tracing::error!("{:?}", self);
         let status = match self {
             Self::Unauthorized(..) => StatusCode::UNAUTHORIZED,
             Self::ValidationError(..) | Self::MustUniqueError(..) => {
