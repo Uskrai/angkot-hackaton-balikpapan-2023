@@ -387,6 +387,8 @@ pub enum MessageFromUser<U> {
 
     PickupRequest { id: String },
     PickupResponse { id: String, accept: bool },
+
+    Close,
 }
 
 pub struct UserState {
@@ -484,7 +486,7 @@ impl UserState {
                 requested_id,
             } => {
                 if self.id != requested_id {
-                    return false;
+                    return true;
                 }
 
                 self.send_force(MessageToUser::PickupRequest { id: requester_id })
@@ -497,7 +499,7 @@ impl UserState {
                 accepted,
             } => {
                 if self.id != requester_id {
-                    return false;
+                    return true;
                 }
 
                 self.send_force(MessageToUser::PickupResponse {
@@ -572,7 +574,7 @@ where
             }
         }
 
-        tracing::trace!("closing websocket {current_id}");
+        tracing::info!("closing websocket {current_id}");
         close_user();
     };
 
@@ -586,6 +588,7 @@ where
             match it {
                 DMessage::StateMessage(message) => {
                     if !userstate.send_message(message).await {
+                        tracing::info!("break from userstate");
                         break;
                     }
                 }
@@ -642,14 +645,30 @@ where
                             MessageFromUser::PickupRequest { id } => {
                                 match state.list.lock().get_mut(&id).and_then(|it| it.as_mut()) {
                                     Some(it) => {
-                                        // only allow customer
+                                        // only allow sending to shared taxi or bus
+                                        match it {
+                                            User::Customer(_) => continue,
+                                            User::SharedTaxi(_) | User::Bus(_) => {}
+                                        }
+                                    }
+                                    None => continue,
+                                }
+
+                                match state
+                                    .list
+                                    .lock()
+                                    .get_mut(&current_id)
+                                    .and_then(|it| it.as_mut())
+                                {
+                                    Some(it) => {
+                                        // only allow from customer
                                         match it {
                                             User::Customer(_) => {}
                                             User::SharedTaxi(_) | User::Bus(_) => continue,
                                         }
                                     }
                                     None => continue,
-                                }
+                                };
 
                                 Some(state_sender.send(StateMessage::PickupRequest {
                                     requester_id: current_id.clone(),
@@ -659,20 +678,39 @@ where
                             MessageFromUser::PickupResponse { id, accept } => {
                                 match state.list.lock().get_mut(&id).and_then(|it| it.as_mut()) {
                                     Some(it) => {
-                                        // only disallow customer
+                                        // only sending to customer
                                         match it {
-                                            User::Customer(_) => continue,
-                                            User::SharedTaxi(_) | User::Bus(_) => {}
+                                            User::Customer(_) => {}
+                                            User::SharedTaxi(_) | User::Bus(_) => continue,
                                         }
                                     }
                                     None => continue,
                                 }
+
+                                match state
+                                    .list
+                                    .lock()
+                                    .get_mut(&current_id)
+                                    .and_then(|it| it.as_mut())
+                                {
+                                    Some(it) => {
+                                        // only allow sender from shared taxi or bus
+                                        match it {
+                                            User::Customer(_) => {}
+                                            User::SharedTaxi(_) | User::Bus(_) => continue,
+                                        }
+                                    }
+                                    None => continue,
+                                };
 
                                 Some(state_sender.send(StateMessage::PickupResponse {
                                     requester_id: id,
                                     requested_id: current_id.clone(),
                                     accepted: accept,
                                 }))
+                            }
+                            MessageFromUser::Close => {
+                                break;
                             }
                         };
 
@@ -681,12 +719,17 @@ where
                         }
                     }
                     WSMessage::Close(_) => {
+                        tracing::info!("closing");
                         break;
                     }
-                    _ => {}
+                    e => {
+                        tracing::info!("{:?}", e);
+                    }
                 },
             }
         }
+
+        tracing::info!("main loop stop {current_id}");
     };
 
     futures::join!(state_receiver, websocket_sender, channel_receiver);
