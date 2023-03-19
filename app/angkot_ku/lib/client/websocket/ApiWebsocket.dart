@@ -191,10 +191,6 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
     );
   }
 
-  void responsePickup(String id, bool accept) {
-    //
-  }
-
   @override
   void changeLocation(LatLng location) {
     customer = customer.copyWith(
@@ -208,6 +204,7 @@ class CustomerWebsocketClient extends GenericWebsocketClient {
   @override
   void close() {
     _changedController.close();
+    _wsChannel?.sink.add(jsonEncode({"Close"}));
     _wsChannel?.sink.close();
   }
 
@@ -351,6 +348,7 @@ class SharedTaxiWebsocketClient extends DriverWebsocketClient {
   @override
   void close() {
     _changedController.close();
+    _wsChannel?.sink.add(jsonEncode({"Close"}));
     _wsChannel?.sink.close();
   }
 
@@ -399,7 +397,6 @@ class BusWebsocketClient extends DriverWebsocketClient {
 
   @override
   void connect() {
-    print(route.id);
     var uri = Uri.encodeFull(
       "ws://$url/$routeName/${route.id}",
     );
@@ -474,6 +471,7 @@ class BusWebsocketClient extends DriverWebsocketClient {
   @override
   void close() {
     _changedController.close();
+    _wsChannel?.sink.add(jsonEncode({"Close"}));
     _wsChannel?.sink.close();
   }
 
@@ -487,7 +485,6 @@ InitialMessage? decodeInitialMessage(dynamic json) {
   if (json['InitialMessage'] != null) {
     var email = json["InitialMessage"]['email'];
 
-    print(json);
     return InitialMessage(email: email);
   }
   return null;
