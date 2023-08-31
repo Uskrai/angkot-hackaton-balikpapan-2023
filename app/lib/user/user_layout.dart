@@ -1,7 +1,7 @@
-import 'package:angkot_ku/client/User.dart';
-import 'package:angkot_ku/client/websocket/ApiWebsocket.dart';
-import 'package:angkot_ku/maps.dart';
-import 'package:angkot_ku/user/user_map_layout.dart';
+import 'package:angkot/client/User.dart';
+import 'package:angkot/client/websocket/ApiWebsocket.dart';
+import 'package:angkot/maps.dart';
+import 'package:angkot/user/user_map_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 

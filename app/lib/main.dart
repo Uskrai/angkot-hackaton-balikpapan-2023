@@ -1,6 +1,6 @@
-import 'package:angkot_ku/authentication/login_layout.dart';
-import 'package:angkot_ku/client/User.dart';
-import 'package:angkot_ku/user/user_layout.dart';
+import 'package:angkot/authentication/login_layout.dart';
+import 'package:angkot/client/User.dart';
+import 'package:angkot/user/user_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:angkot_ku/client/websocket/ApiWebsocket.dart';
-import 'package:angkot_ku/maps.dart';
+import 'package:angkot/client/websocket/ApiWebsocket.dart';
+import 'package:angkot/maps.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';

@@ -1,5 +1,5 @@
 //
-// import 'package:angkot_ku/temp/route.dart';
+// import 'package:angkot/temp/route.dart';
 // import 'package:latlong2/latlong.dart';
 //
 // RoleRoute createDummyRoute() {

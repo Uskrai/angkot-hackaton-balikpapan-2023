@@ -1,7 +1,7 @@
-import 'package:angkot_ku/client/websocket/ApiWebsocket.dart';
-import 'package:angkot_ku/driver/driver_map_layout.dart';
-import 'package:angkot_ku/location_widget.dart';
-import 'package:angkot_ku/routes/route_layout.dart';
+import 'package:angkot/client/websocket/ApiWebsocket.dart';
+import 'package:angkot/driver/driver_map_layout.dart';
+import 'package:angkot/location_widget.dart';
+import 'package:angkot/routes/route_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 

@@ -1,5 +1,5 @@
-import 'package:angkot_ku/authentication/register_layout.dart';
-import 'package:angkot_ku/client/ApiClient.dart';
+import 'package:angkot/authentication/register_layout.dart';
+import 'package:angkot/client/ApiClient.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';

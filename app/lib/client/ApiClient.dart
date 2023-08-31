@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:angkot_ku/client/User.dart';
-import 'package:angkot_ku/client/VehicleType.dart';
-import 'package:angkot_ku/client/websocket/ApiWebsocket.dart';
-import 'package:angkot_ku/temp/route.dart';
+import 'package:angkot/client/User.dart';
+import 'package:angkot/client/VehicleType.dart';
+import 'package:angkot/client/websocket/ApiWebsocket.dart';
+import 'package:angkot/temp/route.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'Authenticated.dart';

@@ -1,4 +1,4 @@
-import 'package:angkot_ku/client/VehicleType.dart';
+import 'package:angkot/client/VehicleType.dart';
 import 'package:latlong2/latlong.dart';
 
 class LineRoute {

@@ -1,4 +1,4 @@
-import 'package:angkot_ku/maps.dart';
+import 'package:angkot/maps.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
